@@ -4,12 +4,13 @@
 const CACHE_NAME = 'retenza-v1';
 const STATIC_CACHE = 'retenza-static-v1';
 const DYNAMIC_CACHE = 'retenza-dynamic-v1';
+const NOTIFICATION_CACHE = 'retenza-notifications-v1';
 
 // Install event - cache static assets
-self.addEventListener('install', function(event) {
+self.addEventListener('install', function (event) {
   console.log('Service Worker installing...');
   event.waitUntil(
-    caches.open(STATIC_CACHE).then(function(cache) {
+    caches.open(STATIC_CACHE).then(function (cache) {
       return cache.addAll([
         '/',
         '/icon-192.png',
@@ -24,13 +25,13 @@ self.addEventListener('install', function(event) {
 });
 
 // Activate event - clean up old caches
-self.addEventListener('activate', function(event) {
+self.addEventListener('activate', function (event) {
   console.log('Service Worker activating...');
   event.waitUntil(
-    caches.keys().then(function(cacheNames) {
+    caches.keys().then(function (cacheNames) {
       return Promise.all(
-        cacheNames.map(function(cacheName) {
-          if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+        cacheNames.map(function (cacheName) {
+          if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE && cacheName !== NOTIFICATION_CACHE) {
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -44,7 +45,7 @@ self.addEventListener('activate', function(event) {
 });
 
 // Fetch event - handle caching strategy
-self.addEventListener('fetch', function(event) {
+self.addEventListener('fetch', function (event) {
   const { request } = event;
   const url = new URL(request.url);
 
@@ -88,14 +89,14 @@ self.addEventListener('fetch', function(event) {
 });
 
 // Push event handling for notifications
-self.addEventListener('push', function(event) {
+self.addEventListener('push', function (event) {
   console.log('Push event received:', event);
-  
+
   if (event.data) {
     try {
       const data = event.data.json();
       console.log('Push data:', data);
-      
+
       const options = {
         body: data.body || 'New notification from Retenza',
         icon: '/icon-192.png',
@@ -104,7 +105,10 @@ self.addEventListener('push', function(event) {
         data: data.data || {},
         requireInteraction: data.requireInteraction || false,
         renotify: data.renotify || false,
-        actions: data.actions || [],
+        actions: data.actions || [
+          { action: 'view', title: 'View', icon: '/icon-192.png' },
+          { action: 'dismiss', title: 'Dismiss' }
+        ],
         vibrate: [200, 100, 200],
         timestamp: Date.now(),
         silent: false,
@@ -118,10 +122,23 @@ self.addEventListener('push', function(event) {
       );
 
       event.waitUntil(notificationPromise);
-      
+
+      // Cache notification data for offline access
+      event.waitUntil(
+        caches.open(NOTIFICATION_CACHE).then(cache => {
+          const notificationData = {
+            id: Date.now().toString(),
+            timestamp: Date.now(),
+            data: data,
+            read: false
+          };
+          return cache.put(`/notification-${notificationData.id}`, new Response(JSON.stringify(notificationData)));
+        })
+      );
+
     } catch (error) {
       console.error('Error processing push event:', error);
-      
+
       // Fallback notification
       const fallbackOptions = {
         body: 'You have a new notification from Retenza',
@@ -129,6 +146,9 @@ self.addEventListener('push', function(event) {
         badge: '/icon-192.png',
         tag: 'fallback',
         vibrate: [200, 100, 200],
+        actions: [
+          { action: 'view', title: 'View', icon: '/icon-192.png' }
+        ]
       };
 
       event.waitUntil(
@@ -143,6 +163,9 @@ self.addEventListener('push', function(event) {
       badge: '/icon-192.png',
       tag: 'default',
       vibrate: [200, 100, 200],
+      actions: [
+        { action: 'view', title: 'View', icon: '/icon-192.png' }
+      ]
     };
 
     event.waitUntil(
@@ -152,11 +175,11 @@ self.addEventListener('push', function(event) {
 });
 
 // Notification click event
-self.addEventListener('notificationclick', function(event) {
+self.addEventListener('notificationclick', function (event) {
   console.log('Notification clicked:', event);
-  
+
   event.notification.close();
-  
+
   // Handle notification click
   if (event.action) {
     console.log('Action clicked:', event.action);
@@ -180,7 +203,7 @@ self.addEventListener('notificationclick', function(event) {
   } else {
     // Default behavior: focus/open the app
     event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
         // Check if there's already a window/tab open with the target URL
         for (let i = 0; i < clientList.length; i++) {
           const client = clientList[i];
@@ -188,7 +211,7 @@ self.addEventListener('notificationclick', function(event) {
             return client.focus();
           }
         }
-        
+
         // If no window/tab is open, open a new one
         if (clients.openWindow) {
           return clients.openWindow('/');
@@ -199,33 +222,85 @@ self.addEventListener('notificationclick', function(event) {
 });
 
 // Notification close event
-self.addEventListener('notificationclose', function(event) {
+self.addEventListener('notificationclose', function (event) {
   console.log('Notification closed:', event);
   // You can track notification engagement here
 });
 
 // Background sync for offline notifications
-self.addEventListener('sync', function(event) {
+self.addEventListener('sync', function (event) {
   console.log('Background sync event:', event);
-  
+
   if (event.tag === 'background-sync') {
     event.waitUntil(
       // Handle background sync tasks
       console.log('Processing background sync...')
     );
   }
+
+  if (event.tag === 'notification-sync') {
+    event.waitUntil(
+      // Sync notifications when back online
+      syncNotifications()
+    );
+  }
 });
 
+// Handle offline/online events
+self.addEventListener('online', function (event) {
+  console.log('Service Worker is online');
+  // Sync any pending notifications
+  event.waitUntil(syncNotifications());
+});
+
+self.addEventListener('offline', function (event) {
+  console.log('Service Worker is offline');
+});
+
+// Function to sync notifications when back online
+async function syncNotifications() {
+  try {
+    const cache = await caches.open(NOTIFICATION_CACHE);
+    const requests = await cache.keys();
+
+    for (const request of requests) {
+      if (request.url.includes('/notification-')) {
+        const response = await cache.match(request);
+        const notificationData = await response.json();
+
+        // Mark as synced
+        notificationData.synced = true;
+        await cache.put(request, new Response(JSON.stringify(notificationData)));
+      }
+    }
+
+    console.log('Notifications synced successfully');
+  } catch (error) {
+    console.error('Error syncing notifications:', error);
+  }
+}
+
 // Message event for communication with main thread
-self.addEventListener('message', function(event) {
+self.addEventListener('message', function (event) {
   console.log('Message received in service worker:', event.data);
-  
+
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
+
   if (event.data && event.data.type === 'GET_VERSION') {
     event.ports[0].postMessage({ version: '1.0.0' });
+  }
+
+  if (event.data && event.data.type === 'GET_NOTIFICATIONS') {
+    event.waitUntil(
+      caches.open(NOTIFICATION_CACHE).then(cache => {
+        return cache.keys();
+      }).then(requests => {
+        const notifications = requests.filter(req => req.url.includes('/notification-'));
+        event.ports[0].postMessage({ notifications: notifications.length });
+      })
+    );
   }
 });
 

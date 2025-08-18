@@ -2,6 +2,7 @@ import { db } from '@/server/db';
 import { pushSubscriptions, notifications } from '@/server/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import type { NotificationData } from '../pushNotifications';
+import { env } from '@/env';
 
 interface PushSubscription {
     customer_id: number;
@@ -220,7 +221,8 @@ export class ServerPushNotificationService {
         notification: NotificationData
     ): Promise<void> {
         try {
-            const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000';
+            // Use a configurable base URL or default to localhost
+            const baseUrl = env.BASE_URL ?? process.env.VERCEL_URL ?? 'http://localhost:3000';
             const response = await fetch(`${baseUrl}/api/push/send`, {
                 method: 'POST',
                 headers: {

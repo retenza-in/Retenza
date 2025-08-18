@@ -56,8 +56,8 @@ export const usePushNotifications = ({ businessId, businessName }: UsePushNotifi
                 throw new Error('Notification permission denied');
             }
 
-            // Register service worker
-            const registration = await navigator.serviceWorker.register('/sw.js');
+            // Register our standalone service worker
+            const registration = await navigator.serviceWorker.register('/sw-standalone.js');
             await navigator.serviceWorker.ready;
 
             // Subscribe to push notifications
