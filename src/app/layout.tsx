@@ -54,30 +54,28 @@ export default function RootLayout({
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', async () => {
                   try {
-                    // Register service worker
-                    await navigator.serviceWorker.register('/sw.js');
-                    console.log('SW registered');
-
-                    // Wait for active service worker
-                    const reg = await navigator.serviceWorker.ready;
-
+                    // Register our standalone service worker
+                    const registration = await navigator.serviceWorker.register('/sw-standalone.js');
+                    console.log('Standalone SW registered successfully:', registration);
+                    
                     // Request notification permission
-                    if ('Notification' in window) {
+                    if ('Notification' in window && Notification.permission === 'default') {
                       const permission = await Notification.requestPermission();
-                      if (permission === 'granted') {
-                        console.log('Notification permission granted.');
-
-                        // Show a test notification
-                        reg.showNotification('Hello from Retenza 🚀', {
-                          body: 'This is a test PWA notification.',
-                          icon: '/icon-192.png',
-                        });
-                      } else {
-                        console.log('Notification permission denied:', permission);
-                      }
+                      console.log('Notification permission:', permission);
                     }
+                    
+                    // Check for updates
+                    registration.addEventListener('updatefound', () => {
+                      console.log('Service Worker update found');
+                      const newWorker = registration.installing;
+                      newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                          console.log('New service worker available');
+                        }
+                      });
+                    });
                   } catch (err) {
-                    console.log('SW registration/notification failed:', err);
+                    console.log('SW registration failed:', err);
                   }
                 });
               }
