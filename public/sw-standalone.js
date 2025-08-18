@@ -94,8 +94,33 @@ self.addEventListener('push', function (event) {
 
   if (event.data) {
     try {
-      const data = event.data.json();
-      console.log('Push data:', data);
+      let data;
+
+      // Try to parse as JSON first
+      try {
+        data = event.data.json();
+        console.log('Push data parsed as JSON:', data);
+      } catch (jsonError) {
+        // If JSON parsing fails, try to get as text
+        try {
+          const textData = event.data.text();
+          console.log('Push data as text:', textData);
+
+          // Try to parse the text as JSON
+          data = JSON.parse(textData);
+          console.log('Push data parsed from text:', data);
+        } catch (textError) {
+          console.log('Push data as raw:', event.data);
+
+          // Create a fallback data structure
+          data = {
+            title: 'Retenza Notification',
+            body: 'You have a new notification',
+            tag: 'fallback',
+            data: {}
+          };
+        }
+      }
 
       const options = {
         body: data.body || 'New notification from Retenza',
@@ -112,7 +137,6 @@ self.addEventListener('push', function (event) {
         vibrate: [200, 100, 200],
         timestamp: Date.now(),
         silent: false,
-        sound: '/notification-sound.mp3', // Optional: add a notification sound
       };
 
       // Show notification

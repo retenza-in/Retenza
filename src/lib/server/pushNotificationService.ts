@@ -2,7 +2,6 @@ import { db } from '@/server/db';
 import { pushSubscriptions, notifications } from '@/server/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import type { NotificationData } from '../pushNotifications';
-import { env } from '@/env';
 
 interface PushSubscription {
     customer_id: number;
@@ -221,22 +220,49 @@ export class ServerPushNotificationService {
         notification: NotificationData
     ): Promise<void> {
         try {
-            // Use a configurable base URL or default to localhost
-            const baseUrl = env.BASE_URL ?? process.env.VERCEL_URL ?? 'http://localhost:3000';
-            const response = await fetch(`${baseUrl}/api/push/send`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    subscription,
-                    notification,
-                }),
+            // Import web-push dynamically to avoid server-side import issues
+            const webpush = (await import('web-push')).default;
+
+            // Set VAPID details
+            const vapidKeys = {
+                publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '',
+                privateKey: process.env.VAPID_PRIVATE_KEY ?? '',
+            };
+
+            webpush.setVapidDetails(
+                'mailto:retenza24@gmail.com',
+                vapidKeys.publicKey,
+                vapidKeys.privateKey
+            );
+
+            // Create proper subscription object for web-push
+            const pushSubscription = {
+                endpoint: subscription.endpoint,
+                keys: {
+                    p256dh: subscription.p256dh,
+                    auth: subscription.auth
+                }
+            };
+
+            // Prepare the payload
+            const payload = JSON.stringify({
+                title: notification.title,
+                body: notification.body,
+                data: notification.data ?? {},
+                actions: notification.actions ?? [],
+                requireInteraction: notification.requireInteraction ?? false,
+                tag: notification.tag ?? 'default',
+                renotify: notification.renotify ?? false,
             });
 
-            if (!response.ok) {
-                throw new Error(`Failed to send push notification: ${response.statusText}`);
+            // Send the push notification directly
+            const result = await webpush.sendNotification(pushSubscription, payload);
+
+            if (result.statusCode !== 200 && result.statusCode !== 201) {
+                throw new Error(`Push notification failed with status: ${result.statusCode}`);
             }
+
+            console.log(`Push notification sent successfully to ${subscription.endpoint}`);
         } catch (error) {
             console.error('Error sending push notification:', error);
             throw error;
