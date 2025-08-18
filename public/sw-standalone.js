@@ -91,6 +91,7 @@ self.addEventListener('fetch', function (event) {
 // Push event handling for notifications
 self.addEventListener('push', function (event) {
   console.log('Push event received:', event);
+  console.log('Push data:', event.data);
 
   if (event.data) {
     try {
@@ -101,6 +102,7 @@ self.addEventListener('push', function (event) {
         data = event.data.json();
         console.log('Push data parsed as JSON:', data);
       } catch (jsonError) {
+        console.log('JSON parsing failed, trying text:', jsonError);
         // If JSON parsing fails, try to get as text
         try {
           const textData = event.data.text();
@@ -110,6 +112,7 @@ self.addEventListener('push', function (event) {
           data = JSON.parse(textData);
           console.log('Push data parsed from text:', data);
         } catch (textError) {
+          console.log('Text parsing failed:', textError);
           console.log('Push data as raw:', event.data);
 
           // Create a fallback data structure
@@ -137,7 +140,21 @@ self.addEventListener('push', function (event) {
         vibrate: [200, 100, 200],
         timestamp: Date.now(),
         silent: false,
+        // Add mobile-specific options
+        android: {
+          icon: '/android/android-launchericon-192-192.png',
+          color: '#317EFB',
+          priority: 'high',
+          sticky: false,
+        },
+        // Add iOS-specific options
+        ios: {
+          icon: '/ios/192.png',
+          badge: 1,
+        }
       };
+
+      console.log('Showing notification with options:', options);
 
       // Show notification
       const notificationPromise = self.registration.showNotification(
@@ -180,6 +197,7 @@ self.addEventListener('push', function (event) {
       );
     }
   } else {
+    console.log('No push data received, showing default notification');
     // No data, show default notification
     const defaultOptions = {
       body: 'You have a new notification from Retenza',
@@ -201,6 +219,7 @@ self.addEventListener('push', function (event) {
 // Notification click event
 self.addEventListener('notificationclick', function (event) {
   console.log('Notification clicked:', event);
+  console.log('Notification action:', event.action);
 
   event.notification.close();
 

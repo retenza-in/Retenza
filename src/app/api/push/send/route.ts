@@ -7,6 +7,12 @@ const vapidKeys = {
     privateKey: process.env.VAPID_PRIVATE_KEY ?? '',
 };
 
+console.log('VAPID keys in send route - public:', vapidKeys.publicKey ? 'configured' : 'missing', 'private:', vapidKeys.privateKey ? 'configured' : 'missing');
+
+if (!vapidKeys.publicKey || !vapidKeys.privateKey) {
+    console.error('VAPID keys not configured in send route');
+}
+
 webpush.setVapidDetails(
     'mailto:retenza24@gmail.com',
     vapidKeys.publicKey,
@@ -36,6 +42,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        console.log('Sending notification:', notification.title, 'to subscription:', subscription.endpoint);
+
         // Prepare the payload
         const payload = JSON.stringify({
             title: notification.title,
@@ -47,10 +55,13 @@ export async function POST(request: NextRequest) {
             renotify: notification.renotify ?? false,
         });
 
+        console.log('Notification payload:', payload);
+
         // Send the push notification
         const result = await webpush.sendNotification(subscription as unknown as webpush.PushSubscription, payload);
 
         if (result.statusCode === 200 || result.statusCode === 201) {
+            console.log('Push notification sent successfully');
             return NextResponse.json({ success: true, message: 'Push notification sent successfully' });
         } else {
             console.error('Push notification failed:', result);

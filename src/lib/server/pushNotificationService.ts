@@ -223,11 +223,17 @@ export class ServerPushNotificationService {
             // Import web-push dynamically to avoid server-side import issues
             const webpush = (await import('web-push')).default;
 
-            // Set VAPID details
+            // Set VAPID details - use the correct environment variable names
             const vapidKeys = {
                 publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '',
                 privateKey: process.env.VAPID_PRIVATE_KEY ?? '',
             };
+
+            console.log('VAPID keys - public:', vapidKeys.publicKey ? 'configured' : 'missing', 'private:', vapidKeys.privateKey ? 'configured' : 'missing');
+
+            if (!vapidKeys.publicKey || !vapidKeys.privateKey) {
+                throw new Error('VAPID keys not configured. Please set NEXT_PUBLIC_VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY environment variables.');
+            }
 
             webpush.setVapidDetails(
                 'mailto:retenza24@gmail.com',
@@ -244,6 +250,8 @@ export class ServerPushNotificationService {
                 }
             };
 
+            console.log('Sending push notification to:', subscription.endpoint);
+
             // Prepare the payload
             const payload = JSON.stringify({
                 title: notification.title,
@@ -254,6 +262,8 @@ export class ServerPushNotificationService {
                 tag: notification.tag ?? 'default',
                 renotify: notification.renotify ?? false,
             });
+
+            console.log('Push notification payload:', payload);
 
             // Send the push notification directly
             const result = await webpush.sendNotification(pushSubscription, payload);
