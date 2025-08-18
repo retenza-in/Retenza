@@ -23,13 +23,6 @@ export const usePushNotifications = ({ businessId, businessName }: UsePushNotifi
         checkSupport();
     }, []);
 
-    // Check subscription status on mount
-    useEffect(() => {
-        if (isSupported) {
-            void checkSubscriptionStatus();
-        }
-    }, [isSupported, businessId]);
-
     const checkSubscriptionStatus = useCallback(async () => {
         try {
             const registration = await navigator.serviceWorker.ready;
@@ -39,6 +32,13 @@ export const usePushNotifications = ({ businessId, businessName }: UsePushNotifi
             console.error('Error checking subscription status:', err);
         }
     }, []);
+
+    // Check subscription status on mount
+    useEffect(() => {
+        if (isSupported) {
+            void checkSubscriptionStatus();
+        }
+    }, [isSupported, businessId, checkSubscriptionStatus]);
 
     const subscribe = useCallback(async () => {
         if (!isSupported) {
