@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Trophy, TrendingUp, Users, CalendarClock, RefreshCcw } from 'lucide-react';
+import { BusinessNotificationPanel } from '@/components/BusinessNotificationPanel';
 import {
   ResponsiveContainer,
   BarChart,
@@ -136,11 +137,11 @@ export default function BusinessDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[{
           title: 'Total Customers', value: totalCustomers, icon: Users, desc: 'with loyalty at your business'
-        },{
+        }, {
           title: 'Avg Points / Customer', value: avgPointsPerCustomer, icon: Trophy, desc: 'current snapshot'
-        },{
+        }, {
           title: 'Last Week vs Month', value: weekVsMonthChangePct, icon: TrendingUp, desc: 'vs month/4 baseline', highlight: true
-        },{
+        }, {
           title: 'Active Lately', value: payload?.transactionsLastWeek ?? 0, icon: CalendarClock, desc: 'transactions last 7 days'
         }].map((kpi, idx) => (
           <Card key={idx} className="bg-white shadow rounded-xl">
@@ -198,6 +199,29 @@ export default function BusinessDashboardPage() {
         </Card>
       </div>
 
+      {/* Notifications Row */}
+      <div className="mb-6">
+        <Card className="bg-white shadow rounded-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5" />
+              Customer Engagement
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Send notifications to engage your customers and drive loyalty
+              </p>
+              <BusinessNotificationPanel
+                businessId={user?.id ?? 0}
+                businessName="Your Business"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Lists Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Points Leaderboard */}
@@ -209,7 +233,7 @@ export default function BusinessDashboardPage() {
                 {topPoints.map((u, i) => (
                   <div key={u.id} className="flex items-center justify-between rounded-xl border p-3 hover:bg-amber-50 cursor-pointer" onClick={() => router.push(`/business/customers/${u.id}`)}>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-xs font-semibold">#{i+1}</div>
+                      <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-xs font-semibold">#{i + 1}</div>
                       <div className="flex flex-col">
                         <span className="font-medium">{u.name}</span>
                       </div>

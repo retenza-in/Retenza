@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useAuthSession } from '@/hooks/useAuthSession';
-import { Separator } from '@/components/ui/separator'; 
+import { Separator } from '@/components/ui/separator';
+import { NotificationBell } from '@/components/NotificationBell';
 import {
   Table,
   TableBody,
@@ -78,8 +79,8 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
           if (!response.ok) {
             throw new Error('Failed to fetch shop details.');
           }
-                      const data = await response.json() as ShopData;
-            setShopData(data);
+          const data = await response.json() as ShopData;
+          setShopData(data);
         } catch (err: unknown) {
           setError((err as Error)?.message ?? 'Error loading shop details');
         } finally {
@@ -113,7 +114,7 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
 
   const { shop, loyaltyProgram, loyalty, transactions } = shopData;
   const currentPoints = loyalty?.points ?? 0;
-  
+
   const nextTier = loyaltyProgram?.tiers
     .filter(tier => tier.points_to_unlock > currentPoints)
     .sort((a, b) => a.points_to_unlock - b.points_to_unlock)[0];
@@ -128,12 +129,15 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
         <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-gray-800 bg-clip-text text-transparent">
           {shop.name}
         </h1>
-        <Badge
-          variant="secondary"
-          className="text-lg px-4 py-2 bg-amber-100 text-amber-800 border border-amber-200"
-        >
-          {shop.business_type}
-        </Badge>
+        <div className="flex items-center gap-4">
+          <NotificationBell businessId={shop.id} businessName={shop.name} />
+          <Badge
+            variant="secondary"
+            className="text-lg px-4 py-2 bg-amber-100 text-amber-800 border border-amber-200"
+          >
+            {shop.business_type}
+          </Badge>
+        </div>
       </div>
 
       <p className="text-lg text-gray-600 mb-8">Address: {shop.address}</p>
@@ -215,8 +219,8 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
                               {reward.reward_type === 'Free Item'
                                 ? `Free Item: ${reward.description}`
                                 : reward.reward_type === 'Discount'
-                                ? `${reward.value}% discount`
-                                : `${reward.value} cashback`}
+                                  ? `${reward.value}% discount`
+                                  : `${reward.value} cashback`}
                             </li>
                           ))}
                         </ul>

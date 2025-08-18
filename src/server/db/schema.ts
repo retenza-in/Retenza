@@ -17,7 +17,7 @@ import { relations } from "drizzle-orm";
 
 export const businesses = pgTable("businesses", {
   id: serial("id").primaryKey(),
-  
+
   phone_number: varchar("phone_number", { length: 20 }).unique().notNull(),
   hashed_password: text("hashed_password").notNull(),
 
@@ -50,14 +50,14 @@ export const customers = pgTable("customers", {
 // ====================================================================================
 
 export type Tier = {
-    id: number;
-    name: string;
-    points_to_unlock: number;
-    rewards: {
-        reward_type: string;
-        description: string;
-        value: number;
-    }[];
+  id: number;
+  name: string;
+  points_to_unlock: number;
+  rewards: {
+    reward_type: string;
+    description: string;
+    value: number;
+  }[];
 };
 
 export const loyaltyPrograms = pgTable("loyalty_programs", {
@@ -122,7 +122,35 @@ export const sessions = pgTable("sessions", {
 });
 
 // ====================================================================================
-// G. Drizzle Relations 
+// G. Push Notifications
+// ====================================================================================
+
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: serial("id").primaryKey(),
+  customer_id: integer("customer_id").notNull(),
+  business_id: integer("business_id").notNull(),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  customer_id: integer("customer_id").notNull(),
+  business_id: integer("business_id").notNull(),
+  type: varchar("type", { length: 50 }).notNull(), // 'points_earned', 'reward_unlocked', 'goal_nudge', 'inactivity_winback', 'trending_missions', 'tier_rewards'
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  data: jsonb("data").$type<Record<string, any>>().default({}),
+  is_read: boolean("is_read").default(false),
+  sent_at: timestamp("sent_at").defaultNow().notNull(),
+  read_at: timestamp("read_at"),
+});
+
+// ====================================================================================
+// H. Drizzle Relations 
 // ====================================================================================
 
 export const businessRelations = relations(businesses, ({ one, many }) => ({
@@ -134,12 +162,16 @@ export const businessRelations = relations(businesses, ({ one, many }) => ({
   campaigns: many(campaigns),
   transactions: many(transactions),
   sessions: many(sessions),
+  pushSubscriptions: many(pushSubscriptions),
+  notifications: many(notifications),
 }));
 
 export const customerRelations = relations(customers, ({ many }) => ({
   customerLoyalty: many(customerLoyalty),
   transactions: many(transactions),
   sessions: many(sessions),
+  pushSubscriptions: many(pushSubscriptions),
+  notifications: many(notifications),
 }));
 
 export const customerLoyaltyRelations = relations(customerLoyalty, ({ one }) => ({
@@ -188,6 +220,28 @@ export const sessionRelations = relations(sessions, ({ one }) => ({
     references: [customers.id],
   }),
 }));
+
+export const pushSubscriptionRelations = relations(pushSubscriptions, ({ one }) => ({
+  customer: one(customers, {
+    fields: [pushSubscriptions.customer_id],
+    references: [customers.id],
+  }),
+  business: one(businesses, {
+    fields: [pushSubscriptions.business_id],
+    references: [businesses.id],
+  }),
+}));
+
+export const notificationRelations = relations(notifications, ({ one }) => ({
+  customer: one(customers, {
+    fields: [notifications.customer_id],
+    references: [customers.id],
+  }),
+  business: one(businesses, {
+    fields: [notifications.business_id],
+    references: [businesses.id],
+  }),
+}));
 export const schema = {
   businesses,
   customers,
@@ -196,5 +250,7 @@ export const schema = {
   campaigns,
   transactions,
   sessions,
+  pushSubscriptions,
+  notifications,
 };
 
