@@ -53,7 +53,6 @@ export default function BusinessLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -81,9 +80,7 @@ export default function BusinessLogin() {
         </div>
       </motion.header>
 
-      {/* Main Content */}
       <div className="flex min-h-[calc(100vh-4rem)]">
-        {/* Left Side - Form */}
         <motion.div
           initial="hidden"
           animate="show"
@@ -117,7 +114,6 @@ export default function BusinessLogin() {
           </motion.div>
         </motion.div>
 
-        {/* Right Side - Benefits */}
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}

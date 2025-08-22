@@ -49,12 +49,10 @@ export default function RetenzaLanding() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check if user is logged in by looking for session cookie
         const response = await fetch('/api/auth/session');
         if (response.ok) {
           const data = await response.json() as { user: any; role: string | null };
           if (data.user && data.role) {
-            // User is logged in, redirect based on role
             if (data.role === 'business') {
               void router.push('/business');
             } else if (data.role === 'user') {
@@ -63,7 +61,6 @@ export default function RetenzaLanding() {
           }
         }
       } catch (error) {
-        // If there's an error, user is not logged in, stay on landing page
         console.log('User not authenticated, staying on landing page');
       }
     };
@@ -292,10 +289,8 @@ export default function RetenzaLanding() {
               </motion.div>
             </motion.div>
 
-            {/* Phone Mockup */}
             <motion.div variants={scaleIn} className="relative">
               <div className="relative mx-auto w-64 h-80 sm:w-80 sm:h-96">
-                {/* Floating Elements */}
                 <motion.div
                   animate={{ y: [-10, 10, -10] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -312,14 +307,11 @@ export default function RetenzaLanding() {
                   <Trophy className="w-8 h-8 text-white" />
                 </motion.div>
 
-                {/* Phone Frame */}
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl shadow-2xl border-4 border-gray-700">
                   <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gray-600 rounded-full"></div>
 
-                  {/* Screen */}
                   <div className="absolute top-6 bottom-6 left-3 right-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl overflow-hidden">
                     <div className="p-4 h-full">
-                      {/* App Header */}
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <h3 className="text-sm font-bold text-gray-900">Welcome, Riya!</h3>
@@ -340,7 +332,6 @@ export default function RetenzaLanding() {
                         <div className="text-xs opacity-90">₹284 worth rewards</div>
                       </div>
 
-                      {/* Progress */}
                       <div className="mb-4">
                         <div className="flex justify-between text-xs mb-2">
                           <span className="text-gray-600">Progress to Platinum</span>
@@ -351,7 +342,6 @@ export default function RetenzaLanding() {
                         </div>
                       </div>
 
-                      {/* Quick Actions */}
                       <div className="grid grid-cols-2 gap-2">
                         <div className="bg-white/80 backdrop-blur-sm rounded-lg p-2 text-center shadow-sm">
                           <Gift className="w-4 h-4 text-blue-600 mx-auto mb-1" />
@@ -371,7 +361,6 @@ export default function RetenzaLanding() {
         </div>
       </section>
 
-      {/* How It Works */}
       <section className="py-16 sm:py-24 bg-gradient-to-br from-gray-50 to-blue-50 relative">
         <div className="absolute inset-0 opacity-3 bg-gradient-to-br from-gray-200 to-blue-200"></div>
 
@@ -424,7 +413,6 @@ export default function RetenzaLanding() {
         </div>
       </section>
 
-      {/* Features Grid */}
       <section className="py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -472,7 +460,6 @@ export default function RetenzaLanding() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-16 sm:py-24 bg-gradient-to-br from-blue-600 to-purple-700 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-blue-200 to-purple-200"></div>
 
@@ -522,7 +509,6 @@ export default function RetenzaLanding() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-gray-900 text-white py-12 relative">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

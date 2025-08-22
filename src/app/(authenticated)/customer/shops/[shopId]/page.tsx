@@ -204,9 +204,7 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Loyalty Status */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Loyalty Status Card */}
             <Card className="border-0 shadow-sm bg-white rounded-2xl">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-xl font-semibold text-gray-900">
@@ -218,7 +216,6 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Points Display */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-lg font-medium text-gray-700">Total Points</span>
@@ -232,7 +229,6 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
                   </p>
                 </div>
 
-                {/* Current Tier */}
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-100">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-lg font-medium text-gray-700">Current Tier</span>
@@ -263,7 +259,6 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
                   )}
                 </div>
 
-                {/* Progress to Next Tier */}
                 {nextTier && (
                   <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
                     <div className="flex items-center justify-between mb-3">
@@ -335,7 +330,6 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
             </Card>
           </div>
 
-          {/* Right Column - Loyalty Program Details */}
           <div className="space-y-6">
             {loyaltyProgram && (
               <Card className="border-0 shadow-sm bg-white rounded-2xl">
@@ -407,7 +401,6 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
               </Card>
             )}
 
-            {/* Quick Stats */}
             <Card className="border-0 shadow-sm bg-white rounded-2xl">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg font-semibold text-gray-900">Quick Stats</CardTitle>

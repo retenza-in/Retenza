@@ -68,13 +68,10 @@ export default function CustomerMissionsPage() {
   const { user, role, loading } = useAuthSession();
   const router = useRouter();
 
-  // State for available missions
   const [companyMissions, setCompanyMissions] = useState<CompanyMissions[]>([]);
 
-  // State for mission progress
   const [missionProgress, setMissionProgress] = useState<MissionRegistry[]>([]);
 
-  // UI state
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCompany, setSelectedCompany] = useState<string>('all');
   const [missionsLoading, setMissionsLoading] = useState(true);
@@ -104,7 +101,6 @@ export default function CustomerMissionsPage() {
       }
       const data = await response.json() as Mission[];
 
-      // Group missions by company
       const grouped = data.reduce((acc: CompanyMissions[], mission) => {
         const existing = acc.find(c => c.business_id === mission.business_id);
         if (existing) {
@@ -254,7 +250,6 @@ export default function CustomerMissionsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container mx-auto py-12 px-4">
-        {/* Compact Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Sparkles className="w-6 h-6 text-purple-600" />
@@ -302,7 +297,6 @@ export default function CustomerMissionsPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Available Missions Tab */}
           <TabsContent value="available" className="space-y-8">
             {filteredCompanyMissions.length === 0 ? (
               <div className="text-center py-16">
@@ -358,7 +352,6 @@ export default function CustomerMissionsPage() {
                             </CardHeader>
 
                             <CardContent className="space-y-4">
-                              {/* Offer Badge */}
                               <div className="flex items-center gap-2">
                                 <Gift className="w-4 h-4 text-green-600" />
                                 <Badge className="bg-green-100 text-green-800 font-medium">
@@ -366,13 +359,11 @@ export default function CustomerMissionsPage() {
                                 </Badge>
                               </div>
 
-                              {/* Expiry Date */}
                               <div className="flex items-center gap-2 text-sm text-gray-500">
                                 <Calendar className="w-4 h-4" />
                                 <span>Expires: {new Date(mission.expires_at).toLocaleDateString()}</span>
                               </div>
 
-                              {/* Action Button */}
                               {!isInProgress && !isCompleted ? (
                                 <Button
                                   onClick={() => startMission(mission)}
@@ -403,7 +394,6 @@ export default function CustomerMissionsPage() {
             )}
           </TabsContent>
 
-          {/* Mission Progress Tab */}
           <TabsContent value="progress" className="space-y-6">
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -442,13 +432,11 @@ export default function CustomerMissionsPage() {
                       </CardHeader>
 
                       <CardContent className="space-y-4">
-                        {/* Business Name */}
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Building2 className="w-4 h-4" />
                           <span className="font-medium">{registry.business_name}</span>
                         </div>
 
-                        {/* Offer */}
                         <div className="flex items-center gap-2">
                           <Gift className="w-4 h-4 text-green-600" />
                           <Badge className="bg-green-100 text-green-800 text-xs">
@@ -456,7 +444,6 @@ export default function CustomerMissionsPage() {
                           </Badge>
                         </div>
 
-                        {/* Progress Details */}
                         <div className="space-y-2 text-sm text-gray-600">
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4" />

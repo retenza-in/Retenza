@@ -15,17 +15,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
-import { Building2, CheckCircle, Users, Gift, Target } from 'lucide-react';
+import { Star, Building2, CheckCircle, Users, Gift, Target } from 'lucide-react';
 
 const phoneNumberSchema = z.string().regex(/^(\+?\d{1,3})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/, "Invalid phone number format.");
 const businessInfoSchema = z.object({
   name: z.string().min(2, 'Business name is required.'),
   phone_number: phoneNumberSchema,
+  contact_number_2: phoneNumberSchema.optional().or(z.literal('')),
   address: z.string().min(5, 'Address is required.'),
   business_type: z.string().min(1, 'Business type is required.'),
-  description: z.string().optional().or(z.literal('')),
-  gmap_link: z.string().url('Invalid URL format').optional().or(z.literal('')),
-  logo_url: z.string().optional().or(z.literal('')),
   password: z.string().min(8, 'Password must be at least 8 characters.'),
   confirmPassword: z.string().min(8, 'Please confirm your password.'),
 }).refine(data => data.password === data.confirmPassword, {
@@ -188,7 +186,6 @@ export default function BusinessSignupPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -197,12 +194,8 @@ export default function BusinessSignupPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
-                <img
-                  src="/icon-512.png"
-                  alt="Retenza Logo"
-                  className="w-full h-full object-cover"
-                />
+              <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <Star className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">RETENZA</span>
             </div>
@@ -216,9 +209,7 @@ export default function BusinessSignupPage() {
         </div>
       </motion.header>
 
-      {/* Main Content */}
       <div className="flex min-h-[calc(100vh-4rem)]">
-        {/* Left Side - Form */}
         <motion.div
           initial="hidden"
           animate="show"
@@ -309,7 +300,6 @@ export default function BusinessSignupPage() {
           </motion.div>
         </motion.div>
 
-        {/* Right Side - Benefits */}
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}

@@ -383,14 +383,12 @@ export default function BusinessCashierPage() {
 
       toast.success('Transaction processed successfully!');
 
-      // Reset form
       setCustomer(null);
       setPhoneInput('');
       setBillAmount('');
       setRedeemedRewards([]);
       setIsNewCustomer(false);
 
-      // Show transaction summary
       toast.info(`Final amount: ₹${calculateFinalAmount().toFixed(2)}`);
 
     } catch (error) {

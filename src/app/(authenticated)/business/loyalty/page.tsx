@@ -209,7 +209,6 @@ export default function LoyaltyPage() {
         </div>
       </div>
 
-      {/* Stats Section */}
       {program && (
         <div className="container mx-auto px-4 py-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -276,7 +275,6 @@ export default function LoyaltyPage() {
         </div>
       )}
 
-      {/* Main Content */}
       <div className="container mx-auto px-4 pb-8">
         {!program ? (
           <Card className="border border-gray-200 shadow-sm">
