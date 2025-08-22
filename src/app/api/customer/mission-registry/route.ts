@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getUserFromSession } from '@/lib/session';
 import { db } from '@/server/db';
-import { missionRegistry, missions } from '@/server/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
-import { getCustomerFromSession } from '@/lib/session';
+import { missionRegistry, missions, notifications } from '@/server/db/schema';
+import { eq, and } from 'drizzle-orm';
 
 // Get customer's mission registries
 export async function GET(req: NextRequest) {
     try {
-        const customer = await getCustomerFromSession();
+        const customer = await getUserFromSession();
         if (!customer) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
             .from(missionRegistry)
             .innerJoin(missions, eq(missionRegistry.mission_id, missions.id))
             .where(whereClause)
-            .orderBy(desc(missionRegistry.started_at));
+            .orderBy(missionRegistry.started_at);
 
         return NextResponse.json({ success: true, registries });
     } catch (error) {
@@ -52,40 +52,73 @@ export async function GET(req: NextRequest) {
 // Start a new mission
 export async function POST(req: NextRequest) {
     try {
-        const customer = await getCustomerFromSession();
+        const customer = await getUserFromSession();
         if (!customer) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const body = await req.json() as { mission_id: number; business_id: number };
+        const { mission_id, business_id } = body;
 
-        if (!body.mission_id || !body.business_id) {
-            return NextResponse.json({ error: "Missing mission_id or business_id" }, { status: 400 });
+        if (!mission_id || !business_id) {
+            return NextResponse.json({ error: "Mission ID and business ID are required" }, { status: 400 });
         }
 
-        // Check if mission is already in progress for this customer
-        const existingRegistry = await db
-            .select()
+        // Check if mission already exists
+        const existingMission = await db.select()
             .from(missionRegistry)
             .where(and(
                 eq(missionRegistry.customer_id, customer.id),
-                eq(missionRegistry.mission_id, body.mission_id),
-                eq(missionRegistry.status, 'in_progress')
-            ));
+                eq(missionRegistry.mission_id, mission_id)
+            ))
+            .limit(1);
 
-        if (existingRegistry.length > 0) {
-            return NextResponse.json({ error: "Mission already in progress" }, { status: 409 });
+        if (existingMission.length > 0) {
+            return NextResponse.json({ error: "Mission already in progress" }, { status: 400 });
         }
 
-        // Create new mission registry
-        const newRegistry = await db.insert(missionRegistry).values({
-            customer_id: customer.id,
-            mission_id: body.mission_id,
-            business_id: body.business_id,
-            status: 'in_progress',
-        }).returning();
+        // Get mission details
+        const missionData = await db.select()
+            .from(missions)
+            .where(eq(missions.id, mission_id))
+            .limit(1);
 
-        return NextResponse.json({ success: true, registry: newRegistry[0] });
+        if (missionData.length === 0) {
+            return NextResponse.json({ error: "Mission not found" }, { status: 404 });
+        }
+
+        const mission = missionData[0];
+
+        // Start the mission
+        await db.insert(missionRegistry).values({
+            customer_id: customer.id,
+            mission_id,
+            business_id,
+            status: 'in_progress',
+            started_at: new Date(),
+        });
+
+        // Send notification about mission started
+        await db.insert(notifications).values({
+            customer_id: customer.id,
+            business_id,
+            type: 'mission_started',
+            title: 'Mission Started! 🚀',
+            body: `You've started "${mission.title}" mission. ${mission.offer}`,
+            data: {
+                mission_id,
+                mission_title: mission.title,
+                mission_offer: mission.offer,
+                started_at: new Date()
+            }
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: "Mission started successfully",
+            mission_id,
+            status: 'in_progress'
+        });
     } catch (error) {
         console.error("Error starting mission:", error);
         return NextResponse.json({ error: "Failed to start mission" }, { status: 500 });

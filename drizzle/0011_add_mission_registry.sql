@@ -1,4 +1,3 @@
--- Migration to add mission registry table
 CREATE TABLE "mission_registry" (
   "id" SERIAL PRIMARY KEY,
   "customer_id" INTEGER NOT NULL,
@@ -12,7 +11,6 @@ CREATE TABLE "mission_registry" (
   "notes" TEXT
 );
 
--- Add foreign key constraints
 ALTER TABLE "mission_registry" ADD CONSTRAINT "mission_registry_customer_id_fkey" 
   FOREIGN KEY ("customer_id") REFERENCES "customers"("id") ON DELETE CASCADE;
 
@@ -22,7 +20,6 @@ ALTER TABLE "mission_registry" ADD CONSTRAINT "mission_registry_mission_id_fkey"
 ALTER TABLE "mission_registry" ADD CONSTRAINT "mission_registry_business_id_fkey" 
   FOREIGN KEY ("business_id") REFERENCES "businesses"("id") ON DELETE CASCADE;
 
--- Add indexes for better performance
 CREATE INDEX "mission_registry_customer_id_idx" ON "mission_registry"("customer_id");
 CREATE INDEX "mission_registry_mission_id_idx" ON "mission_registry"("mission_id");
 CREATE INDEX "mission_registry_business_id_idx" ON "mission_registry"("business_id");

@@ -74,7 +74,13 @@ export async function POST(
     if (lp?.tiers?.length) {
       const tiers = lp.tiers as Array<{ points_to_unlock: number; name: string }>;
       tiers.sort((a, b) => a.points_to_unlock - b.points_to_unlock);
-      for (const t of tiers) if (newPoints >= t.points_to_unlock) newTier = t.name;
+      // Find the highest tier the customer qualifies for
+      for (let i = tiers.length - 1; i >= 0; i--) {
+        if (newPoints >= tiers[i].points_to_unlock) {
+          newTier = tiers[i].name;
+          break; // Found the highest qualifying tier
+        }
+      }
     }
 
     await db
@@ -89,7 +95,13 @@ export async function POST(
     if (lp?.tiers?.length) {
       const tiers = lp.tiers as Array<{ points_to_unlock: number; name: string }>;
       tiers.sort((a, b) => a.points_to_unlock - b.points_to_unlock);
-      for (const t of tiers) if (pointsAwarded >= t.points_to_unlock) initialTier = t.name;
+      // Find the highest tier the customer qualifies for
+      for (let i = tiers.length - 1; i >= 0; i--) {
+        if (pointsAwarded >= tiers[i].points_to_unlock) {
+          initialTier = tiers[i].name;
+          break; // Found the highest qualifying tier
+        }
+      }
     }
     await db.insert(customerLoyalty).values({
       customer_id: customerId,

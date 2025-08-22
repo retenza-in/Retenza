@@ -1,4 +1,3 @@
--- Create reward_redemptions table to track customer reward usage
 CREATE TABLE IF NOT EXISTS "reward_redemptions" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"customer_id" integer NOT NULL,
@@ -10,7 +9,6 @@ CREATE TABLE IF NOT EXISTS "reward_redemptions" (
 	"redeemed_at" timestamp DEFAULT now() NOT NULL
 );
 
--- Add indexes for better performance
 CREATE INDEX IF NOT EXISTS "reward_redemptions_customer_business_idx" ON "reward_redemptions" ("customer_id", "business_id");
 CREATE INDEX IF NOT EXISTS "reward_redemptions_reward_id_idx" ON "reward_redemptions" ("reward_id");
 CREATE INDEX IF NOT EXISTS "reward_redemptions_transaction_id_idx" ON "reward_redemptions" ("transaction_id");

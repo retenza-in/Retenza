@@ -28,6 +28,15 @@ interface Shop {
   logo_url?: string;
 }
 
+interface DashboardShop {
+  shopId: string;
+  shopName: string;
+  shopType: string;
+  loyaltyPoints: number;
+  currentTier: string;
+  logoUrl?: string;
+}
+
 type ViewMode = 'grid' | 'list';
 type SortBy = 'name' | 'type' | 'distance' | 'rating' | 'points';
 
@@ -35,6 +44,7 @@ export default function ShopsPage() {
   const { user, role, loading: authLoading } = useAuthSession();
   const router = useRouter();
   const [shops, setShops] = useState<Shop[]>([]);
+  const [myShops, setMyShops] = useState<Shop[]>([]);
   const [shopsLoading, setShopsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,13 +71,31 @@ export default function ShopsPage() {
       const fetchShops = async () => {
         setShopsLoading(true);
         try {
-          const response = await fetch('/api/customer/shops');
-          if (!response.ok) {
+          // Fetch all shops
+          const allShopsResponse = await fetch('/api/customer/shops');
+          if (!allShopsResponse.ok) {
             toast.error('Failed to load shops');
             throw new Error('Failed to fetch shops.');
           }
-          const data = await response.json() as Shop[];
-          setShops(data);
+          const allShopsData = await allShopsResponse.json() as Shop[];
+          setShops(allShopsData);
+
+          // Fetch my shops (with loyalty data) from dashboard
+          const dashboardResponse = await fetch('/api/customer/dashboard');
+          if (dashboardResponse.ok) {
+            const dashboardData = await dashboardResponse.json() as { shops: DashboardShop[] };
+            // Convert dashboard shop format to regular shop format
+            const convertedShops: Shop[] = dashboardData.shops.map(shop => ({
+              id: parseInt(shop.shopId),
+              name: shop.shopName,
+              business_type: shop.shopType,
+              address: '', // Dashboard doesn't provide address
+              loyaltyPoints: shop.loyaltyPoints,
+              currentTier: shop.currentTier,
+              logo_url: shop.logoUrl
+            }));
+            setMyShops(convertedShops);
+          }
         } catch (err: unknown) {
           const errorMessage = (err as Error)?.message ?? 'Error loading shops';
           toast.error(errorMessage);
@@ -165,8 +193,131 @@ export default function ShopsPage() {
             Discover Shops
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Explore Loyalty Programs
+            Discover & Manage Shops
           </h1>
+          <p className="text-gray-600 text-sm md:text-base">
+            Track your loyalty progress and explore new opportunities
+          </p>
+        </motion.div>
+
+        {/* My Shops Section */}
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={fadeUp}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              <Store className="w-6 h-6 text-blue-500" />
+              My Shops
+            </h2>
+            <div className="flex items-center gap-3">
+              <Badge variant="secondary" className="text-sm bg-blue-100 text-blue-700 border-blue-200">
+                {myShops.length} Active
+              </Badge>
+              <Button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedType('all');
+                  // Show all my shops by replacing the shops list
+                  if (myShops.length > 4) {
+                    setShops(myShops);
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                className="border-blue-200 text-blue-600 hover:bg-blue-50"
+              >
+                View All My Shops
+              </Button>
+            </div>
+          </div>
+
+          {myShops.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {myShops
+                .sort((a, b) => (b.loyaltyPoints ?? 0) - (a.loyaltyPoints ?? 0))
+                .slice(0, 4)
+                .map((shop, index) => (
+                  <Card
+                    key={shop.id}
+                    className="border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer group bg-gradient-to-br from-blue-50 to-white"
+                    onClick={() => router.push(`/customer/shops/${shop.id}`)}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 border-blue-200">
+                          #{index + 1}
+                        </Badge>
+                        <div className="flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-blue-500" />
+                          <span className="text-xs font-medium text-blue-600">{shop.loyaltyPoints} pts</span>
+                        </div>
+                      </div>
+                      <CardTitle className="text-sm font-semibold text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        {shop.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <Badge variant="outline" className="text-xs border-gray-300 text-gray-600">
+                        {shop.business_type}
+                      </Badge>
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <MapPin className="w-3 h-3" />
+                        <span className="line-clamp-1">{shop.address}</span>
+                      </div>
+                      <div className="pt-2">
+                        <Button
+                          size="sm"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          View Details
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          ) : (
+            <Card className="border-2 border-dashed border-gray-300 bg-gray-50">
+              <CardContent className="p-6 text-center">
+                <Store className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">You haven&apos;t visited any shops yet. Start shopping to earn points!</p>
+                <p className="text-xs text-gray-400 mt-1">Your visited shops will appear here</p>
+              </CardContent>
+            </Card>
+          )}
+        </motion.div>
+
+        {/* Section Divider */}
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={fadeUp}
+          transition={{ delay: 0.12 }}
+          className="mb-6"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex-1 border-t border-gray-200"></div>
+            <div className="px-4">
+              <Badge variant="outline" className="text-xs text-gray-500 border-gray-300">
+                {myShops.length === shops.length ? 'My Shops Only' : 'All Available Shops'}
+              </Badge>
+            </div>
+            <div className="flex-1 border-t border-gray-200"></div>
+            {myShops.length === shops.length && shops.length > 4 && (
+              <Button
+                onClick={() => window.location.reload()}
+                variant="outline"
+                size="sm"
+                className="ml-4 border-gray-300 text-gray-600 hover:bg-gray-50"
+              >
+                Show All Shops
+              </Button>
+            )}
+          </div>
         </motion.div>
 
         {/* Compact Search and Filters Section */}
@@ -174,7 +325,7 @@ export default function ShopsPage() {
           initial="hidden"
           animate="show"
           variants={fadeUp}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.15 }}
           className="mb-6"
         >
           <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">

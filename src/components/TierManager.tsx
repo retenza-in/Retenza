@@ -251,7 +251,8 @@ function getRewardDisplayText(reward: Reward): string {
     if (reward.reward_type === 'cashback') {
         return `${reward.percentage}% cashback`;
     } else if (reward.reward_type === 'limited_usage') {
-        return `${reward.reward_text} (Limit: ${reward.usage_limit}, ${reward.one_time ? 'One-time' : 'Multiple'})`;
+        const monthlyText = reward.usage_limit_per_month === 1 ? 'Monthly' : reward.usage_limit_per_month === 0.5 ? 'Bi-monthly' : `${reward.usage_limit_per_month} times per month`;
+        return `${reward.reward_text} (${monthlyText}, ${reward.one_time ? 'One-time' : 'Multiple'})`;
     } else if (reward.reward_type === 'custom') {
         return `${reward.name}: ${reward.reward}`;
     }

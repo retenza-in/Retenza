@@ -3,6 +3,7 @@ import { db } from '@/server/db';
 import { missionRegistry, missions, customers } from '@/server/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { getUserFromSession } from '@/lib/session';
+import { notifications } from '@/server/db/schema';
 
 // Get all mission registries for a business
 export async function GET(req: NextRequest) {
@@ -147,6 +148,38 @@ export async function PUT(req: NextRequest) {
 
         if (updatedRegistry.length === 0) {
             return NextResponse.json({ error: "Mission registry not found" }, { status: 404 });
+        }
+
+        // If mission is completed, send notification
+        if (body.status === 'completed') {
+            const registry = updatedRegistry[0];
+
+            // Get mission details for notification
+            const missionData = await db.select()
+                .from(missions)
+                .where(eq(missions.id, registry.mission_id))
+                .limit(1);
+
+            if (missionData.length > 0) {
+                const mission = missionData[0];
+
+                // Send notification about mission completion
+                await db.insert(notifications).values({
+                    customer_id: registry.customer_id,
+                    business_id: registry.business_id,
+                    type: 'mission_completed',
+                    title: 'Mission Completed! 🎉',
+                    body: `Congratulations! You've completed "${mission.title}" mission and earned ${body.discount_amount ? `₹${body.discount_amount}` : `${body.discount_percentage}%`} discount!`,
+                    data: {
+                        mission_id: registry.mission_id,
+                        mission_title: mission.title,
+                        mission_offer: mission.offer,
+                        discount_amount: body.discount_amount,
+                        discount_percentage: body.discount_percentage,
+                        completed_at: new Date()
+                    }
+                });
+            }
         }
 
         return NextResponse.json({ success: true, registry: updatedRegistry[0] });

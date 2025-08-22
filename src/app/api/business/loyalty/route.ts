@@ -34,9 +34,13 @@ async function recalcCustomerTier(businessId: number, customerId: number, tiers:
     .limit(1);
   if (!cl) return;
 
-  let newTier = cl.current_tier_name;
-  for (const t of tiers) {
-    if (cl.points >= t.points_to_unlock) newTier = t.name;
+  // Find the highest tier the customer qualifies for
+  let newTier = tiers[0]?.name || cl.current_tier_name; // Default to first tier
+  for (let i = tiers.length - 1; i >= 0; i--) {
+    if (cl.points >= tiers[i].points_to_unlock) {
+      newTier = tiers[i].name;
+      break; // Found the highest qualifying tier
+    }
   }
 
   await db
@@ -107,7 +111,7 @@ export async function POST(req: NextRequest) {
           return reward.percentage === r2Reward.percentage;
         } else if (reward.reward_type === 'limited_usage') {
           return reward.reward_text === r2Reward.reward_text &&
-            reward.usage_limit === r2Reward.usage_limit;
+            reward.usage_limit_per_month === r2Reward.usage_limit_per_month;
         } else if (reward.reward_type === 'custom') {
           return reward.reward === r2Reward.reward &&
             reward.name === r2Reward.name;
@@ -135,6 +139,7 @@ export async function POST(req: NextRequest) {
         tiers: updatedTiers,
       }).where(eq(loyaltyPrograms.business_id, business.id)).returning();
 
+      // Update all customer tiers after modifying the loyalty program
       await updateAllCustomerTiers(business.id, updatedTiers.map(tier => ({ points_to_unlock: tier.points_to_unlock, name: tier.name })));
 
       return NextResponse.json(updated[0]);
@@ -200,7 +205,7 @@ export async function DELETE(req: NextRequest) {
     const business = await getUserFromSession();
     if (!business) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const body = await req.json() as { tierName: string; reward?: { reward_type: 'cashback' | 'limited_usage' | 'custom'; percentage?: number; reward_text?: string; usage_limit?: number; name?: string; reward?: string } };
+    const body = await req.json() as { tierName: string; reward?: { reward_type: 'cashback' | 'limited_usage' | 'custom'; percentage?: number; reward_text?: string; usage_limit_per_month?: number; name?: string; reward?: string } };
     const { tierName, reward } = body;
 
     if (!tierName || typeof tierName !== "string") {
@@ -236,7 +241,7 @@ export async function DELETE(req: NextRequest) {
           return r.percentage === reward.percentage;
         } else if (r.reward_type === 'limited_usage') {
           return r.reward_text === reward.reward_text &&
-            r.usage_limit === reward.usage_limit;
+            r.usage_limit_per_month === reward.usage_limit_per_month;
         } else if (r.reward_type === 'custom') {
           return r.reward === reward.reward &&
             r.name === reward.name;

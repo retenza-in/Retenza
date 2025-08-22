@@ -14,11 +14,7 @@ export type Reward = {
     reward_type: 'cashback' | 'limited_usage' | 'custom';
     percentage?: number;
     reward_text?: string;
-    usage_limit?: number;
-    time_window?: {
-        start_date: string;
-        end_date: string;
-    };
+    usage_limit_per_month?: number;
     one_time?: boolean;
     name?: string;
     reward?: string;
@@ -36,8 +32,7 @@ export function RewardManager({ rewards, onRewardsChange, disabled = false }: Re
         reward_type: 'cashback',
         percentage: 5,
         reward_text: '',
-        usage_limit: 100,
-        time_window: { start_date: '', end_date: '' },
+        usage_limit_per_month: 1.0,
         one_time: false,
         name: '',
         reward: ''
@@ -51,8 +46,7 @@ export function RewardManager({ rewards, onRewardsChange, disabled = false }: Re
             reward_type: 'cashback',
             percentage: 5,
             reward_text: '',
-            usage_limit: 100,
-            time_window: { start_date: '', end_date: '' },
+            usage_limit_per_month: 1.0,
             one_time: false,
             name: '',
             reward: ''
@@ -63,7 +57,7 @@ export function RewardManager({ rewards, onRewardsChange, disabled = false }: Re
         if (reward.reward_type === 'cashback') {
             return reward.percentage !== undefined && reward.percentage > 0 && reward.percentage <= 100;
         } else if (reward.reward_type === 'limited_usage') {
-            return !!(reward.reward_text && reward.usage_limit && reward.usage_limit > 0);
+            return !!(reward.reward_text && reward.usage_limit_per_month && reward.usage_limit_per_month > 0);
         } else if (reward.reward_type === 'custom') {
             return !!(reward.name && reward.reward);
         }
@@ -75,11 +69,7 @@ export function RewardManager({ rewards, onRewardsChange, disabled = false }: Re
 
         const newReward: Reward = {
             id: Date.now(), // Changed to Date.now() for consistency with database
-            ...rewardInput,
-            time_window: rewardInput.reward_type === 'limited_usage' ? {
-                start_date: rewardInput.time_window?.start_date ?? new Date().toISOString().split('T')[0],
-                end_date: rewardInput.time_window?.end_date ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-            } : undefined
+            ...rewardInput
         };
 
         onRewardsChange([...rewards, newReward]);
@@ -92,11 +82,7 @@ export function RewardManager({ rewards, onRewardsChange, disabled = false }: Re
         const updatedRewards = [...rewards];
         updatedRewards[editingIndex] = {
             ...rewardInput,
-            id: editingReward.id,
-            time_window: rewardInput.reward_type === 'limited_usage' ? {
-                start_date: rewardInput.time_window?.start_date ?? new Date().toISOString().split('T')[0],
-                end_date: rewardInput.time_window?.end_date ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-            } : undefined
+            id: editingReward.id
         };
 
         onRewardsChange(updatedRewards);
@@ -126,7 +112,8 @@ export function RewardManager({ rewards, onRewardsChange, disabled = false }: Re
         if (reward.reward_type === 'cashback') {
             return `${reward.percentage}% cashback`;
         } else if (reward.reward_type === 'limited_usage') {
-            return `${reward.reward_text} (Limit: ${reward.usage_limit}, ${reward.one_time ? 'One-time' : 'Multiple'})`;
+            const monthlyText = reward.usage_limit_per_month === 1 ? 'Monthly' : reward.usage_limit_per_month === 0.5 ? 'Bi-monthly' : `${reward.usage_limit_per_month} times per month`;
+            return `${reward.reward_text} (${monthlyText})`;
         } else if (reward.reward_type === 'custom') {
             return `${reward.name}: ${reward.reward}`;
         }
@@ -163,9 +150,9 @@ export function RewardManager({ rewards, onRewardsChange, disabled = false }: Re
                                                 </span>
                                             </div>
 
-                                            {reward.reward_type === 'limited_usage' && reward.time_window && (
+                                            {reward.reward_type === 'limited_usage' && reward.usage_limit_per_month && (
                                                 <div className="text-sm text-gray-600">
-                                                    <span>Valid: {new Date(reward.time_window.start_date).toLocaleDateString()} - {new Date(reward.time_window.end_date).toLocaleDateString()}</span>
+                                                    <span>Usage: {reward.usage_limit_per_month === 1 ? 'Monthly' : reward.usage_limit_per_month === 0.5 ? 'Bi-monthly' : `${reward.usage_limit_per_month} times per month`}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -253,52 +240,26 @@ export function RewardManager({ rewards, onRewardsChange, disabled = false }: Re
                                 />
                             </div>
 
+
+
+
+
                             <div>
-                                <Label className="text-sm font-medium text-gray-700">Usage Limit</Label>
+                                <Label className="text-sm font-medium text-gray-700">Usage Limit Per Month</Label>
                                 <Input
                                     type="number"
-                                    min="1"
-                                    value={rewardInput.usage_limit ?? ''}
-                                    onChange={(e) => setRewardInput({ ...rewardInput, usage_limit: Number(e.target.value) })}
-                                    disabled={disabled}
-                                    placeholder="e.g., 100"
+                                    step="0.5"
+                                    min="0.5"
+                                    max="12"
+                                    value={rewardInput.usage_limit_per_month ?? ''}
+                                    onChange={(e) => setRewardInput({ ...rewardInput, usage_limit_per_month: Number(e.target.value) })}
+                                    disabled={disabled || rewardInput.one_time}
+                                    placeholder="e.g., 2 (twice per month), 0.5 (bi-monthly)"
                                     className="mt-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                 />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label className="text-sm font-medium text-gray-700">Start Date</Label>
-                                    <Input
-                                        type="date"
-                                        value={rewardInput.time_window?.start_date ?? ''}
-                                        onChange={(e) => setRewardInput({
-                                            ...rewardInput,
-                                            time_window: {
-                                                start_date: e.target.value,
-                                                end_date: rewardInput.time_window?.end_date ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-                                            }
-                                        })}
-                                        disabled={disabled}
-                                        className="mt-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    />
-                                </div>
-                                <div>
-                                    <Label className="text-sm font-medium text-gray-700">End Date</Label>
-                                    <Input
-                                        type="date"
-                                        value={rewardInput.time_window?.end_date ?? ''}
-                                        onChange={(e) => setRewardInput({
-                                            ...rewardInput,
-                                            time_window: {
-                                                start_date: rewardInput.time_window?.start_date ?? new Date().toISOString().split('T')[0],
-                                                end_date: e.target.value
-                                            }
-                                        })}
-                                        disabled={disabled}
-                                        className="mt-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    />
-                                </div>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    {rewardInput.one_time ? 'Disabled for one-time rewards' : '2 = twice per month, 0.5 = bi-monthly, 1 = monthly'}
+                                </p>
                             </div>
 
                             <div className="flex items-center space-x-2">

@@ -13,12 +13,8 @@ const cashbackRewardSchema = z.object({
 
 const limitedUsageRewardSchema = z.object({
   reward_type: z.literal('limited_usage'),
-  reward_text: z.string().min(1, 'Reward text is required.'),
-  usage_limit: z.number().int().positive('Usage limit must be a positive number.'),
-  time_window: z.object({
-    start_date: z.string().min(1, 'Start date is required.'),
-    end_date: z.string().min(1, 'End date is required.'),
-  }),
+  reward_text: z.string().min(1, 'Reward description is required.'),
+  usage_limit_per_month: z.number().positive('Usage limit per month must be a positive number.').max(12, 'Cannot exceed 12 times per month.'),
   one_time: z.boolean(),
 });
 

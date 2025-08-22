@@ -10,6 +10,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:reset": "drizzle-kit drop && drizzle-kit migrate",
+    "db:reset-clean": "./scripts/reset-database.sh",
     "db:studio": "drizzle-kit studio",
     "dev": "next dev --turbo",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",

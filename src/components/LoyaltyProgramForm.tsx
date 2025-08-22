@@ -1,7 +1,7 @@
 'use client';
 
 import { useForm, useFieldArray, useWatch, Controller } from 'react-hook-form';
-import type { FieldErrors, UseFormRegister, Control } from 'react-hook-form';
+import type { FieldErrors, UseFormRegister, Control, UseFormSetValue } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -19,12 +19,8 @@ const cashbackRewardSchema = z.object({
 
 const limitedUsageRewardSchema = z.object({
   reward_type: z.literal('limited_usage'),
-  reward_text: z.string().min(1, 'Reward text is required.'),
-  usage_limit: z.number().int().positive('Usage limit must be a positive number.'),
-  time_window: z.object({
-    start_date: z.string().min(1, 'Start date is required.'),
-    end_date: z.string().min(1, 'End date is required.'),
-  }),
+  reward_text: z.string().min(1, 'Reward description is required.'),
+  usage_limit_per_month: z.number().positive('Usage limit per month must be a positive number.').max(12, 'Cannot exceed 12 times per month.'),
   one_time: z.boolean(),
 });
 
@@ -69,6 +65,7 @@ export function LoyaltyProgramForm({
     register,
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoyaltyProgramData>({
     resolver: zodResolver(loyaltyProgramFormSchema),
@@ -211,6 +208,7 @@ export function LoyaltyProgramForm({
                           tierIndex={tierIndex}
                           control={control}
                           register={register}
+                          setValue={setValue}
                           errors={errors}
                           isLoading={isLoading}
                         />
@@ -250,12 +248,14 @@ export function LoyaltyProgramForm({
 const RewardFields = ({
   control,
   register,
+  setValue,
   tierIndex,
   errors,
   isLoading,
 }: {
   control: Control<LoyaltyProgramData>,
   register: UseFormRegister<LoyaltyProgramData>,
+  setValue: UseFormSetValue<LoyaltyProgramData>,
   tierIndex: number,
   errors: FieldErrors<LoyaltyProgramData>,
   isLoading: boolean
@@ -273,6 +273,8 @@ const RewardFields = ({
       percentage: 5
     });
   };
+
+
 
   return (
     <div className="space-y-4 mt-4">
@@ -304,7 +306,24 @@ const RewardFields = ({
                   name={`tiers.${tierIndex}.rewards.${rewardIndex}.reward_type`}
                   control={control}
                   render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value || 'cashback'} disabled={isLoading}>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        // Set default values based on reward type
+                        if (value === 'limited_usage') {
+                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.reward_text`, '');
+                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.usage_limit_per_month`, 1.0);
+                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.one_time`, false);
+                        } else if (value === 'cashback') {
+                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.percentage`, 5);
+                        } else if (value === 'custom') {
+                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.name`, '');
+                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.reward`, '');
+                        }
+                      }}
+                      value={field.value || 'cashback'}
+                      disabled={isLoading}
+                    >
                       <SelectTrigger className="w-full min-w-0">
                         <SelectValue placeholder="Select a type..." />
                       </SelectTrigger>
@@ -359,45 +378,31 @@ const RewardFields = ({
                     )}
                   </div>
 
+
+
+
+
                   <div>
-                    <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.usage_limit`}>Usage Limit</Label>
+                    <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.usage_limit_per_month`}>Usage Limit Per Month</Label>
                     <Input
-                      id={`tiers.${tierIndex}.rewards.${rewardIndex}.usage_limit`}
+                      id={`tiers.${tierIndex}.rewards.${rewardIndex}.usage_limit_per_month`}
                       type="number"
-                      {...register(`tiers.${tierIndex}.rewards.${rewardIndex}.usage_limit`, { valueAsNumber: true })}
-                      disabled={isLoading}
+                      step="0.5"
+                      {...register(`tiers.${tierIndex}.rewards.${rewardIndex}.usage_limit_per_month`, { valueAsNumber: true })}
+                      disabled={isLoading || rewardData.one_time}
                       className="w-full min-w-0 focus:border-indigo-400 focus:ring-indigo-500"
-                      placeholder="e.g., 100"
-                      min="1"
+                      placeholder="e.g., 2 (twice per month), 0.5 (bi-monthly)"
+                      min="0.5"
+                      max="12"
                     />
+                    <div className="text-xs text-gray-500 mt-1">
+                      {rewardData.one_time ? 'Disabled for one-time rewards' : '2 = twice per month, 0.5 = bi-monthly, 1 = monthly'}
+                    </div>
                     {errors?.tiers?.[tierIndex]?.rewards?.[rewardIndex] && (
                       <p className="text-red-500 text-sm mt-1">
-                        Error in usage limit
+                        Error in reward data
                       </p>
                     )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.time_window.start_date`}>Start Date</Label>
-                      <Input
-                        id={`tiers.${tierIndex}.rewards.${rewardIndex}.time_window.start_date`}
-                        type="date"
-                        {...register(`tiers.${tierIndex}.rewards.${rewardIndex}.time_window.start_date`)}
-                        disabled={isLoading}
-                        className="w-full min-w-0 focus:border-indigo-400 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.time_window.end_date`}>End Date</Label>
-                      <Input
-                        id={`tiers.${tierIndex}.rewards.${rewardIndex}.time_window.end_date`}
-                        type="date"
-                        {...register(`tiers.${tierIndex}.rewards.${rewardIndex}.time_window.end_date`)}
-                        disabled={isLoading}
-                        className="w-full min-w-0 focus:border-indigo-400 focus:ring-indigo-500"
-                      />
-                    </div>
                   </div>
 
                   <div className="flex items-center space-x-2">

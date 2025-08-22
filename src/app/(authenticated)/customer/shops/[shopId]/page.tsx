@@ -1,27 +1,20 @@
 'use client';
 
-import { use, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useRouter } from 'next/navigation';
-import { useAuthSession } from '@/hooks/useAuthSession';
-import { NotificationBell } from '@/components/NotificationBell';
 import { Progress } from '@/components/ui/progress';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import {
-  MapPin,
-  Store,
   Star,
-  TrendingUp,
   Gift,
+  TrendingUp,
   Calendar,
-  DollarSign,
-  Award
+  MapPin,
+  Building2,
+  Award,
+  DollarSign
 } from 'lucide-react';
 
 // Define the reward structure based on actual API response
@@ -77,23 +70,15 @@ interface ShopData {
   }[];
 }
 
-export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: string }> }) {
-  const unwrappedParams = use(params);
-  const { shopId } = unwrappedParams;
-  const { user, role, loading: authLoading } = useAuthSession();
-  const router = useRouter();
+export default function ShopDetailsPage() {
+  const params = useParams();
+  const shopId = params.shopId as string;
   const [shopData, setShopData] = useState<ShopData | null>(null);
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && (!user || role !== 'user')) {
-      router.push('/login');
-    }
-  }, [authLoading, user, role, router]);
-
-  useEffect(() => {
-    if (!authLoading && user && role === 'user' && shopId) {
+    if (shopId) {
       const fetchShopDetails = async () => {
         setPageLoading(true);
         try {
@@ -112,9 +97,9 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
 
       void fetchShopDetails();
     }
-  }, [authLoading, user, role, shopId]);
+  }, [shopId]);
 
-  if (authLoading || pageLoading) {
+  if (pageLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -138,7 +123,7 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
     );
   }
 
-  if (!user || role !== 'user' || !shopData) {
+  if (!shopData) {
     return null;
   }
 
@@ -173,7 +158,7 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
                   </div>
                 ) : (
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <Store className="w-6 h-6 text-white" />
+                    <Building2 className="w-6 h-6 text-white" />
                   </div>
                 )}
                 <div>
@@ -198,7 +183,7 @@ export default function ShopDetailsPage({ params }: { params: Promise<{ shopId: 
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <NotificationBell businessId={shop.id} businessName={shop.name} />
+              {/* Auto-subscribed to notifications when transactions occur */}
             </div>
           </div>
         </div>

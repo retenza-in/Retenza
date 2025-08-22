@@ -66,11 +66,7 @@ export type Tier = {
     percentage?: number;
     // Limited usage reward fields
     reward_text?: string;
-    usage_limit?: number;
-    time_window?: {
-      start_date: string;
-      end_date: string;
-    };
+    usage_limit_per_month?: number; // How many times per month (e.g., 2 = twice per month, 0.5 = bi-monthly)
     one_time?: boolean;
     // Custom reward fields
     name?: string;
@@ -94,6 +90,7 @@ export const customerLoyalty = pgTable("customer_loyalty", {
   customer_id: integer("customer_id").notNull(),
   business_id: integer("business_id").notNull(),
   points: integer("points").default(0).notNull(),
+  redeemable_points: decimal("redeemable_points", { precision: 10, scale: 2 }).default("0.00").notNull(),
   current_tier_name: varchar("current_tier_name", { length: 50 }),
   created_at: timestamp("created_at").defaultNow().notNull(),
   updated_at: timestamp("updated_at").defaultNow().notNull(),

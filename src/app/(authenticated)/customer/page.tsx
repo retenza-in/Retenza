@@ -273,12 +273,92 @@ export default function CustomerDashboard() {
           </div>
         </motion.div>
 
-        {/* Top Missions Section */}
+        {/* My Shops Section - Top 4 Shops You've Visited */}
         <motion.div
           initial="hidden"
           animate="show"
           variants={fadeUp}
           transition={{ delay: 0.2 }}
+          className="mb-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <Store className="w-5 h-5 text-blue-500" />
+              My Shops
+            </h2>
+            <Button
+              onClick={() => router.push('/customer/shops')}
+              variant="outline"
+              size="sm"
+              className="border-blue-200 text-blue-600 hover:bg-blue-50"
+            >
+              View All
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+
+          {shops.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {shops.slice(0, 4).map((shop, index) => (
+                <Card
+                  key={shop.shopId}
+                  className="border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                  onClick={() => router.push(`/customer/shops/${shop.shopId}`)}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 border-blue-200">
+                        #{index + 1}
+                      </Badge>
+                      <Store className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <CardTitle className="text-sm font-semibold text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2">
+                      {shop.shopName}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <Badge variant="outline" className="text-xs border-gray-300 text-gray-600">
+                      {shop.shopType}
+                    </Badge>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">{shop.loyaltyPoints} pts</span>
+                      <span className="font-medium text-gray-800">{shop.currentTier}</span>
+                    </div>
+                    <div className="pt-2">
+                      <Button
+                        size="sm"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        View Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="border-2 border-dashed border-gray-300 bg-gray-50">
+              <CardContent className="p-6 text-center">
+                <Store className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">You haven&apos;t visited any shops yet. Start shopping to earn points!</p>
+                <Button
+                  onClick={() => router.push('/customer/shops')}
+                  size="sm"
+                  className="mt-3 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Browse Shops
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </motion.div>
+
+        {/* Top Missions Section */}
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={fadeUp}
+          transition={{ delay: 0.3 }}
           className="mb-6"
         >
           <div className="flex items-center justify-between mb-4">

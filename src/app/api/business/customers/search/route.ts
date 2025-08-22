@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromSession } from '@/lib/session';
 import { db } from '@/server/db';
-import { customers, loyaltyPrograms, customerLoyalty, rewardRedemptions } from '@/server/db/schema';
+import { customers, customerLoyalty, loyaltyPrograms, rewardRedemptions, pushSubscriptions } from '@/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { Tier } from '@/server/db/schema';
+import { ServerPushNotificationService } from '@/lib/server/pushNotificationService';
 
 export async function GET(req: NextRequest) {
     try {
@@ -60,6 +61,25 @@ export async function GET(req: NextRequest) {
                 .limit(1);
 
             isNewlyEnrolled = true;
+
+            // Auto-subscribe customer to push notifications for this business
+            // Check if customer has any existing push subscriptions (global permission)
+            const globalSubscriptions = await db.select()
+                .from(pushSubscriptions)
+                .where(eq(pushSubscriptions.customer_id, customerData.id))
+                .limit(1);
+
+            if (globalSubscriptions.length > 0) {
+                // Customer has given notification permission, auto-subscribe to this business
+                const globalSub = globalSubscriptions[0];
+                await db.insert(pushSubscriptions).values({
+                    customer_id: customerData.id,
+                    business_id: business.id,
+                    endpoint: globalSub.endpoint,
+                    p256dh: globalSub.p256dh,
+                    auth: globalSub.auth,
+                });
+            }
         }
 
         const loyaltyData = customerLoyaltyData[0];
@@ -103,6 +123,23 @@ export async function GET(req: NextRequest) {
                 eq(rewardRedemptions.business_id, business.id)
             ));
 
+        // Calculate monthly redemption counts for limited usage rewards
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        const monthlyRedemptions: Record<string, number> = {};
+
+        currentTier.rewards.forEach((reward) => {
+            if (reward.reward_type === 'limited_usage') {
+                const monthlyCount = redemptionHistory.filter((redemption: { reward_id: string; redeemed_at: Date }) => {
+                    const redemptionDate = new Date(redemption.redeemed_at);
+                    return parseInt(redemption.reward_id) === reward.id &&
+                        redemptionDate.getMonth() === currentMonth &&
+                        redemptionDate.getFullYear() === currentYear;
+                }).length;
+                monthlyRedemptions[reward.id] = monthlyCount;
+            }
+        });
+
         // Update rewards with redemption counts
         const rewardsWithCounts = currentTier.rewards.map((reward) => {
             const redemptionCount = redemptionHistory.filter(
@@ -121,7 +158,9 @@ export async function GET(req: NextRequest) {
             name: customerData.name,
             current_tier_name: currentTier.name,
             points: loyaltyData.points,
+            redeemable_points: loyaltyData.redeemable_points || 0,
             is_newly_enrolled: isNewlyEnrolled,
+            monthly_redemptions: monthlyRedemptions,
             current_tier: {
                 ...currentTier,
                 rewards: rewardsWithCounts
