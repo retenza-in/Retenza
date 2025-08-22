@@ -4,6 +4,27 @@ import { loyaltyPrograms, customerLoyalty, type Tier } from "@/server/db/schema"
 import { getUserFromSession } from "@/lib/session";
 import { eq, and } from "drizzle-orm";
 
+// Interface for the incoming tier data from frontend
+interface IncomingTier {
+  id?: number;
+  name: string;
+  points_to_unlock: number;
+  rewards: {
+    id?: number;
+    reward_type: 'cashback' | 'limited_usage' | 'custom';
+    percentage?: number;
+    reward_text?: string;
+    usage_limit?: number;
+    time_window?: {
+      start_date: string;
+      end_date: string;
+    };
+    one_time?: boolean;
+    name?: string;
+    reward?: string;
+  }[];
+}
+
 async function recalcCustomerTier(businessId: number, customerId: number, tiers: Array<{ points_to_unlock: number; name: string }>) {
   tiers.sort((a, b) => a.points_to_unlock - b.points_to_unlock);
   const [cl] = await db
@@ -52,10 +73,24 @@ export async function POST(req: NextRequest) {
     const business = await getUserFromSession();
     if (!business) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const body = await req.json() as { tier: Tier; points_rate?: number };
+    const body = await req.json() as { tier: IncomingTier; points_rate?: number };
     if (!body.tier || typeof body.tier !== 'object') {
       return NextResponse.json({ error: "Missing or invalid tier" }, { status: 400 });
     }
+
+    // Transform the tier data to match the detailed structure used in signup
+    const transformedTier: Tier = {
+      id: body.tier.id ?? Date.now(), // Ensure tier has ID
+      name: body.tier.name,
+      points_to_unlock: body.tier.points_to_unlock,
+      rewards: body.tier.rewards.map((reward, index) => {
+        // Preserve the original detailed structure, just add unique ID
+        return {
+          id: reward.id ?? Date.now() + index, // Ensure unique ID
+          ...reward, // Keep all original fields
+        };
+      }),
+    };
 
     const existingPrograms = await db.select()
       .from(loyaltyPrograms)
@@ -65,9 +100,19 @@ export async function POST(req: NextRequest) {
       if (r1.length !== r2.length) return false;
       return r1.every((reward, idx) => {
         const r2Reward = r2[idx];
-        return reward.reward_type === r2Reward.reward_type &&
-               reward.description === r2Reward.description &&
-               reward.value === r2Reward.value;
+        if (reward.reward_type !== r2Reward.reward_type) return false;
+
+        // For the detailed reward structure, compare by type and relevant fields
+        if (reward.reward_type === 'cashback') {
+          return reward.percentage === r2Reward.percentage;
+        } else if (reward.reward_type === 'limited_usage') {
+          return reward.reward_text === r2Reward.reward_text &&
+            reward.usage_limit === r2Reward.usage_limit;
+        } else if (reward.reward_type === 'custom') {
+          return reward.reward === r2Reward.reward &&
+            reward.name === r2Reward.name;
+        }
+        return false;
       });
     }
 
@@ -76,15 +121,15 @@ export async function POST(req: NextRequest) {
       const existingTiers = existingProgram.tiers;
 
       const duplicateTier = existingTiers.find((existingTier: Tier) => {
-        return existingTier.name === body.tier.name &&
-               rewardsMatch(existingTier.rewards, body.tier.rewards);
+        return existingTier.name === transformedTier.name &&
+          rewardsMatch(existingTier.rewards, transformedTier.rewards);
       });
 
       if (duplicateTier) {
         return NextResponse.json({ error: "Duplicate tier found. Cannot add." }, { status: 409 });
       }
 
-      const updatedTiers = [...existingTiers, body.tier];
+      const updatedTiers = [...existingTiers, transformedTier];
 
       const updated = await db.update(loyaltyPrograms).set({
         tiers: updatedTiers,
@@ -101,10 +146,10 @@ export async function POST(req: NextRequest) {
       const inserted = await db.insert(loyaltyPrograms).values({
         business_id: business.id,
         points_rate: body.points_rate,
-        tiers: [body.tier],
+        tiers: [transformedTier],
       }).returning();
 
-      await updateAllCustomerTiers(business.id, [{ points_to_unlock: body.tier.points_to_unlock, name: body.tier.name }]);
+      await updateAllCustomerTiers(business.id, [{ points_to_unlock: transformedTier.points_to_unlock, name: transformedTier.name }]);
 
       return NextResponse.json(inserted[0]);
     }
@@ -114,12 +159,48 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function PUT(req: NextRequest) {
+  try {
+    const business = await getUserFromSession();
+    if (!business) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const body = await req.json() as { tiers: Tier[] };
+    if (!body.tiers || !Array.isArray(body.tiers)) {
+      return NextResponse.json({ error: "Missing or invalid tiers array" }, { status: 400 });
+    }
+
+    const existingPrograms = await db.select()
+      .from(loyaltyPrograms)
+      .where(eq(loyaltyPrograms.business_id, business.id));
+
+    if (existingPrograms.length === 0) {
+      return NextResponse.json({ error: "No loyalty program found" }, { status: 404 });
+    }
+
+    // No need to ensure reward IDs in the new structure
+    const tiersWithIds = body.tiers;
+
+    // Update the program with new tiers
+    const updated = await db.update(loyaltyPrograms).set({
+      tiers: tiersWithIds
+    }).where(eq(loyaltyPrograms.business_id, business.id)).returning();
+
+    // Recalculate customer tiers based on new tier structure
+    await updateAllCustomerTiers(business.id, body.tiers);
+
+    return NextResponse.json({ message: "Tiers updated successfully", program: updated[0] });
+  } catch (error) {
+    console.error("Error updating loyalty program tiers:", error);
+    return NextResponse.json({ error: "Failed to update loyalty program tiers" }, { status: 500 });
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   try {
     const business = await getUserFromSession();
     if (!business) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const body = await req.json() as { tierName: string; reward?: { reward_type: string; description: string; value: number } };
+    const body = await req.json() as { tierName: string; reward?: { reward_type: 'cashback' | 'limited_usage' | 'custom'; percentage?: number; reward_text?: string; usage_limit?: number; name?: string; reward?: string } };
     const { tierName, reward } = body;
 
     if (!tierName || typeof tierName !== "string") {
@@ -142,21 +223,26 @@ export async function DELETE(req: NextRequest) {
     }
 
     if (reward) {
-      if (
-        typeof reward !== "object" ||
-        !reward.reward_type ||
-        !reward.description ||
-        typeof reward.value !== "number"
-      ) {
+      if (typeof reward !== "object" || !reward.reward_type) {
         return NextResponse.json({ error: "Invalid reward object" }, { status: 400 });
       }
 
       const rewards = tiers[tierIndex].rewards;
-      const rewardIndex = rewards.findIndex((r) =>
-        r.reward_type === reward.reward_type &&
-        r.description === reward.description &&
-        r.value === reward.value
-      );
+      const rewardIndex = rewards.findIndex((r) => {
+        if (r.reward_type !== reward.reward_type) return false;
+
+        // For the detailed reward structure, compare by type and relevant fields
+        if (r.reward_type === 'cashback') {
+          return r.percentage === reward.percentage;
+        } else if (r.reward_type === 'limited_usage') {
+          return r.reward_text === reward.reward_text &&
+            r.usage_limit === reward.usage_limit;
+        } else if (r.reward_type === 'custom') {
+          return r.reward === reward.reward &&
+            r.name === reward.name;
+        }
+        return false;
+      });
 
       if (rewardIndex === -1) {
         return NextResponse.json({ error: "Reward not found in tier" }, { status: 404 });

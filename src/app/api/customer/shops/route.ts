@@ -14,6 +14,7 @@ export async function GET(_req: NextRequest) {
       name: businesses.name,
       business_type: businesses.business_type,
       address: businesses.address,
+      logo_url: businesses.logo_url,
     }).from(businesses);
 
     return NextResponse.json(allBusinesses);

@@ -29,7 +29,7 @@ export default function DebugPushPage() {
             if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
                 const registration = await navigator.serviceWorker.ready;
                 const subscription = await registration.pushManager.getSubscription();
-                
+
                 if (subscription) {
                     setSubscriptionInfo({
                         endpoint: subscription.endpoint,

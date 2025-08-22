@@ -57,7 +57,7 @@ export async function POST(
   const insertedTxn = await db.insert(transactions).values({
     customer_id: customerId,
     business_id: businessId,
-    bill_amount: billAmountInt,
+    bill_amount: billAmountInt.toFixed(2),
     points_awarded: pointsAwarded,
   }).returning();
 
@@ -79,7 +79,7 @@ export async function POST(
 
     await db
       .update(customerLoyalty)
-      .set({ 
+      .set({
         ...(customerLoyalty.points && { [customerLoyalty.points.name]: newPoints }),
         ...(customerLoyalty.current_tier_name && { [customerLoyalty.current_tier_name.name]: newTier })
       })

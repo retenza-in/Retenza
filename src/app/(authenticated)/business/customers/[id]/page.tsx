@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 
 interface Transaction {
   id: number;
-  bill_amount: number;
+  bill_amount: string;
   points_awarded: number;
   created_at: string;
 }
@@ -50,10 +50,10 @@ export default function CustomerDetailPage() {
     setLoadingCustomer(true);
     try {
       const res = await fetch(`/api/business/customers/${String(customerId)}`);
-      if (!res.ok){
+      if (!res.ok) {
         toast.error('Failed to fetch customer details');
         throw new Error('Failed to fetch customer');
-      } 
+      }
       const data = await res.json() as {
         customer: Customer;
         loyalty: Loyalty;
@@ -179,7 +179,7 @@ export default function CustomerDetailPage() {
             <div className="grid gap-2">
               {transactions.map((txn) => (
                 <Card key={txn.id} className="p-2">
-                  <p>Bill Amount: {txn.bill_amount}</p>
+                  <p>Bill Amount: ₹{Number(txn.bill_amount).toFixed(2)}</p>
                   <p>Points Awarded: {txn.points_awarded}</p>
                   <p>Date: {new Date(txn.created_at).toLocaleString()}</p>
                 </Card>

@@ -20,7 +20,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shop
         name: businesses.name,
         business_type: businesses.business_type,
         address: businesses.address,
-        loyaltyProgram: loyaltyPrograms, 
+        logo_url: businesses.logo_url,
+        loyaltyProgramId: loyaltyPrograms.id,
+        pointsRate: loyaltyPrograms.points_rate,
+        description: loyaltyPrograms.description,
+        tiers: loyaltyPrograms.tiers,
       })
       .from(businesses)
       .leftJoin(loyaltyPrograms, eq(loyaltyPrograms.business_id, businesses.id))
@@ -46,8 +50,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shop
         name: shopData.name,
         business_type: shopData.business_type,
         address: shopData.address,
+        logo_url: shopData.logo_url,
       },
-      loyaltyProgram: shopData.loyaltyProgram ?? null,
+      loyaltyProgram: shopData.loyaltyProgramId ? {
+        id: shopData.loyaltyProgramId,
+        business_id: shopId,
+        points_rate: shopData.pointsRate,
+        description: shopData.description,
+        tiers: shopData.tiers ?? [],
+      } : null,
       loyalty: customerLoyaltyRecord ?? null,
       transactions: customerTransactions,
     });

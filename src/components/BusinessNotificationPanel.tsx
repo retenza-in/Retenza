@@ -142,7 +142,7 @@ export const BusinessNotificationPanel: React.FC<BusinessNotificationPanelProps>
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-scroll">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         {notificationTypes.map((type) => (
                             <Card key={type.id} className={`cursor-pointer transition-all hover:shadow-md ${selectedType === type.id ? 'ring-2 ring-primary' : ''}`} onClick={() => setSelectedType(type.id)}>

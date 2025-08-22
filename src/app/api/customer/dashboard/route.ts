@@ -19,6 +19,7 @@ export async function GET(_req: NextRequest) {
         shopType: businesses.business_type,
         loyaltyPoints: customerLoyalty.points,
         currentTier: customerLoyalty.current_tier_name,
+        logoUrl: businesses.logo_url,
       })
       .from(customerLoyalty)
       .innerJoin(businesses, eq(customerLoyalty.business_id, businesses.id))
