@@ -461,16 +461,16 @@ export default function BusinessCashierPage() {
           <div className="space-y-6">
             {/* Customer Entry - Simple and Highlighted */}
             <Card className="border-2 border-blue-300 bg-blue-50 shadow-md">
-              <CardHeader className="bg-blue-600 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-white text-lg font-semibold">
+              <CardHeader className="">
+                <CardTitle className="flex items-center gap-2 text-blue-700 text-lg font-semibold">
                   <User className="w-5 h-5" />
                   Enter Customer
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 p-6">
+              <CardContent className="">
                 <div>
-                  <Label htmlFor="phone" className="text-blue-800 font-semibold">Phone Number</Label>
-                  <div className="flex gap-2 mt-2">
+                  <Label htmlFor="phone" className="text-blue-800 mb-2 font-semibold">Phone Number</Label>
+                  <div className="flex gap-2">
                     <Input
                       id="phone"
                       placeholder="Enter customer phone number"
