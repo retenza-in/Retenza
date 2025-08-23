@@ -36,14 +36,7 @@ export async function POST(req: NextRequest) {
         // Calculate points to award (1:1 ratio for now)
         const pointsToAward = Math.floor(bill_amount);
 
-        // Calculate cashback rewards to add to redeemable points
-        let cashbackToAdd = 0;
-        redeemed_rewards.forEach((reward: { reward_id: string; reward_type: string; value: number }) => {
-            if (reward.reward_type === 'cashback') {
-                // For cashback rewards, add the discount value to redeemable points
-                cashbackToAdd += reward.value || 0;
-            }
-        });
+
 
         // Start transaction
         await db.transaction(async (tx) => {
@@ -64,9 +57,43 @@ export async function POST(req: NextRequest) {
             const oldPoints = loyaltyData.points;
             const newPoints = oldPoints + pointsToAward;
 
+            // Calculate cashback rewards to add to redeemable points
+            let cashbackToAdd = 0;
+
+            // Get business loyalty program to find cashback rewards
+            const businessLoyaltyForCashback = await tx.select()
+                .from(loyaltyPrograms)
+                .where(eq(loyaltyPrograms.business_id, business.id))
+                .limit(1);
+
+            if (businessLoyaltyForCashback.length > 0) {
+                const loyaltyProgram = businessLoyaltyForCashback[0];
+                const tiers = loyaltyProgram.tiers || [];
+
+                // Find the customer's current tier
+                let currentTier = null;
+                for (let i = tiers.length - 1; i >= 0; i--) {
+                    if (loyaltyData.points >= tiers[i].points_to_unlock) {
+                        currentTier = tiers[i];
+                        break;
+                    }
+                }
+
+                // Calculate cashback from current tier rewards
+                if (currentTier?.rewards) {
+                    currentTier.rewards.forEach((reward: { reward_type: string; percentage?: number }) => {
+                        if (reward.reward_type === 'cashback' && reward.percentage) {
+                            // Calculate cashback based on bill amount and percentage
+                            const cashbackAmount = (bill_amount * reward.percentage) / 100;
+                            cashbackToAdd += cashbackAmount;
+                        }
+                    });
+                }
+            }
+
             // Calculate new redeemable points (subtract used points + add new cashback)
-            const oldRedeemablePoints = parseFloat(loyaltyData.redeemable_points?.toString() || '0');
-            const newRedeemablePoints = Math.max(0, oldRedeemablePoints - (redeemable_points_used || 0) + cashbackToAdd);
+            const oldRedeemablePoints = parseFloat(loyaltyData.redeemable_points?.toString() ?? '0');
+            const newRedeemablePoints = Math.max(0, oldRedeemablePoints - (redeemable_points_used ?? 0) + cashbackToAdd);
 
             // Update customer loyalty points and redeemable points
             await tx.update(customerLoyalty)
