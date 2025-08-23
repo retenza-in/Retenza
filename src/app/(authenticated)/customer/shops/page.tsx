@@ -23,6 +23,7 @@ interface Shop {
   name: string;
   business_type: string;
   address: string;
+  gmap_link?: string;
   loyaltyPoints?: number;
   currentTier?: string;
   logo_url?: string;
@@ -35,6 +36,7 @@ interface DashboardShop {
   loyaltyPoints: number;
   currentTier: string;
   logoUrl?: string;
+  gmapLink?: string;
 }
 
 type ViewMode = 'grid' | 'list';
@@ -90,6 +92,7 @@ export default function ShopsPage() {
               name: shop.shopName,
               business_type: shop.shopType,
               address: '', // Dashboard doesn't provide address
+              gmap_link: shop.gmapLink,
               loyaltyPoints: shop.loyaltyPoints,
               currentTier: shop.currentTier,
               logo_url: shop.logoUrl
@@ -268,6 +271,9 @@ export default function ShopsPage() {
                         <MapPin className="w-3 h-3" />
                         <span className="line-clamp-1">{shop.address}</span>
                       </div>
+
+
+
                       <div className="pt-2">
                         <Button
                           size="sm"
@@ -482,6 +488,8 @@ export default function ShopsPage() {
                           <p className="line-clamp-2">{shop.address}</p>
                         </div>
 
+
+
                         {shop.loyaltyPoints !== undefined && (
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Loyalty Points:</span>
@@ -558,6 +566,8 @@ export default function ShopsPage() {
                               <MapPin className="w-4 h-4 text-gray-400" />
                               <span className="line-clamp-1">{shop.address}</span>
                             </div>
+
+
 
                             <Button
                               onClick={() => router.push(`/customer/shops/${shop.id}`)}

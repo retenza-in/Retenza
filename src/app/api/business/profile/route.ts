@@ -22,6 +22,7 @@ export async function GET() {
                 address: businesses.address,
                 contact_number: businesses.contact_number,
                 contact_number_2: businesses.contact_number_2,
+                email: businesses.email,
                 gmap_link: businesses.gmap_link,
                 logo_url: businesses.logo_url,
                 additional_info: businesses.additional_info,
@@ -62,6 +63,7 @@ export async function PATCH(request: NextRequest) {
             'address',
             'contact_number',
             'contact_number_2',
+            'email',
             'gmap_link',
             'logo_url',
             'additional_info'
@@ -98,6 +100,7 @@ export async function PATCH(request: NextRequest) {
                 address: businesses.address,
                 contact_number: businesses.contact_number,
                 contact_number_2: businesses.contact_number_2,
+                email: businesses.email,
                 gmap_link: businesses.gmap_link,
                 logo_url: businesses.logo_url,
                 additional_info: businesses.additional_info,

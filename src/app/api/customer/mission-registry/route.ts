@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserFromSession } from '@/lib/session';
+import { getCustomerFromSession } from '@/lib/session';
 import { db } from '@/server/db';
 import { missionRegistry, missions, notifications } from '@/server/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -7,7 +7,7 @@ import { eq, and } from 'drizzle-orm';
 // Get customer's mission registries
 export async function GET(req: NextRequest) {
     try {
-        const customer = await getUserFromSession();
+        const customer = await getCustomerFromSession();
         if (!customer) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
 // Start a new mission
 export async function POST(req: NextRequest) {
     try {
-        const customer = await getUserFromSession();
+        const customer = await getCustomerFromSession();
         if (!customer) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }

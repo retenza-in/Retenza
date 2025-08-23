@@ -35,6 +35,7 @@ export function BusinessInfoForm({
             phone_number: '',
             address: '',
             business_type: '',
+            email: '',
             description: '',
             gmap_link: '',
             logo_url: '',
@@ -248,6 +249,22 @@ export function BusinessInfoForm({
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
+                                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                                        Business Email
+                                    </Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        {...register('email')}
+                                        disabled={isLoading}
+                                        placeholder="business@example.com"
+                                        className="mt-1 focus:border-blue-500 focus:ring-blue-500 border-gray-300"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">We'll use this to send you important updates and notifications</p>
+                                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message ? String(errors.email.message) : 'Invalid input'}</p>}
+                                </div>
+
+                                <div>
                                     <Label htmlFor="gmap_link" className="text-sm font-medium text-gray-700">
                                         Google Maps Link
                                     </Label>
@@ -262,61 +279,61 @@ export function BusinessInfoForm({
                                     <p className="text-xs text-gray-500 mt-1">Customers can click this to get directions to your business</p>
                                     {errors.gmap_link && <p className="text-red-500 text-sm mt-1">{errors.gmap_link.message ? String(errors.gmap_link.message) : 'Invalid input'}</p>}
                                 </div>
+                            </div>
 
-                                <div>
-                                    <Label htmlFor="logo" className="text-sm font-medium text-gray-700">
-                                        Company Logo
-                                    </Label>
-                                    <div className="mt-1 space-y-2">
-                                        <div className="flex items-center gap-3">
+                            <div>
+                                <Label htmlFor="logo" className="text-sm font-medium text-gray-700">
+                                    Company Logo
+                                </Label>
+                                <div className="mt-1 space-y-2">
+                                    <div className="flex items-center gap-3">
+                                        <Button
+                                            type="button"
+                                            onClick={() => document.getElementById('logo-upload')?.click()}
+                                            size="sm"
+                                            variant="outline"
+                                            className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+                                            disabled={isLoading}
+                                        >
+                                            <Upload className="w-4 h-4 mr-2" />
+                                            Upload Logo
+                                        </Button>
+                                        <span className="text-xs text-gray-500">PNG, JPEG, GIF, WebP, SVG (max 5MB)</span>
+                                    </div>
+
+                                    <input
+                                        id="logo-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleLogoUpload}
+                                        disabled={isLoading}
+                                    />
+
+                                    {logoFile && (
+                                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                            <img
+                                                src={URL.createObjectURL(logoFile)}
+                                                alt="Preview"
+                                                className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                                            />
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-gray-900">{logoFile.name}</p>
+                                                <p className="text-xs text-gray-500">{(logoFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                                            </div>
                                             <Button
                                                 type="button"
-                                                onClick={() => document.getElementById('logo-upload')?.click()}
+                                                onClick={() => setLogoFile(null)}
                                                 size="sm"
-                                                variant="outline"
-                                                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
-                                                disabled={isLoading}
+                                                variant="ghost"
+                                                className="text-red-600 hover:text-red-800"
                                             >
-                                                <Upload className="w-4 h-4 mr-2" />
-                                                Upload Logo
+                                                <X className="w-4 h-4" />
                                             </Button>
-                                            <span className="text-xs text-gray-500">PNG, JPEG, GIF, WebP, SVG (max 5MB)</span>
                                         </div>
-
-                                        <input
-                                            id="logo-upload"
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={handleLogoUpload}
-                                            disabled={isLoading}
-                                        />
-
-                                        {logoFile && (
-                                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                <img
-                                                    src={URL.createObjectURL(logoFile)}
-                                                    alt="Preview"
-                                                    className="w-16 h-16 object-cover rounded-lg border border-gray-200"
-                                                />
-                                                <div className="flex-1">
-                                                    <p className="text-sm font-medium text-gray-900">{logoFile.name}</p>
-                                                    <p className="text-xs text-gray-500">{(logoFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                                                </div>
-                                                <Button
-                                                    type="button"
-                                                    onClick={() => setLogoFile(null)}
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    className="text-red-600 hover:text-red-800"
-                                                >
-                                                    <X className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                    {errors.logo_url && <p className="text-red-500 text-sm mt-1">{errors.logo_url.message ? String(errors.logo_url.message) : 'Invalid input'}</p>}
+                                    )}
                                 </div>
+                                {errors.logo_url && <p className="text-red-500 text-sm mt-1">{errors.logo_url.message ? String(errors.logo_url.message) : 'Invalid input'}</p>}
                             </div>
                         </div>
 

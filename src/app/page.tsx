@@ -191,14 +191,26 @@ export default function RetenzaLanding() {
             </div>
 
             <div className="hidden sm:flex items-center space-x-4">
-              <button className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium text-sm">
+              <button
+                onClick={() => router.push('/how-it-works')}
+                className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium text-sm"
+              >
                 How it Works
               </button>
-              <button className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium text-sm">
-                Rewards
-              </button>
-              <button className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium text-sm">
+              <button
+                onClick={() => router.push('/login/customer')}
+                className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium text-sm"
+              >
                 Find Stores
+              </button>
+
+              {/* Download App Button */}
+              <button
+                onClick={installPWA}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:scale-105"
+              >
+                <Download className="w-4 h-4" />
+                Download App
               </button>
             </div>
           </div>

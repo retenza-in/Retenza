@@ -14,6 +14,7 @@ const businessInfoSchema = z.object({
   name: z.string().min(2, 'Business name is required.'),
   address: z.string().min(5, 'Address is required.'),
   business_type: z.string().min(1, 'Business type is required.'),
+  email: z.string().email('Please enter a valid email address.').optional().or(z.literal('')),
   description: z.string().optional().or(z.literal('')),
   gmap_link: z.string().url('Invalid URL format').optional().or(z.literal('')),
   logo_url: z.string().url('Invalid URL format').optional().or(z.literal('')),
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json() as unknown;
     const validatedData = businessInfoSchema.parse(body);
-    const { password, name, address, business_type, description, gmap_link, logo_url, firebaseIdToken } = validatedData;
+    const { password, name, address, business_type, email, description, gmap_link, logo_url, firebaseIdToken } = validatedData;
 
     const decodedToken = await adminAuth.verifyIdToken(firebaseIdToken);
     const phoneNumber = decodedToken.phone_number;
@@ -55,6 +56,7 @@ export async function POST(req: Request) {
         name,
         address,
         business_type,
+        email: email ?? null,
         description: description ?? null,
         gmap_link: gmap_link ?? null,
         logo_url: logo_url ?? null,

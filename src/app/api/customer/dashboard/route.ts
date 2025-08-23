@@ -20,6 +20,7 @@ export async function GET(_req: NextRequest) {
         loyaltyPoints: customerLoyalty.points,
         currentTier: customerLoyalty.current_tier_name,
         logoUrl: businesses.logo_url,
+        gmapLink: businesses.gmap_link,
       })
       .from(customerLoyalty)
       .innerJoin(businesses, eq(customerLoyalty.business_id, businesses.id))

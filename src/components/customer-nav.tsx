@@ -59,6 +59,9 @@ export function CustomerNav() {
                 {item.name}
               </Link>
             ))}
+
+
+
             <Button
               variant="outline"
               size="sm"
@@ -104,10 +107,14 @@ export function CustomerNav() {
                   {item.name}
                 </Link>
               ))}
+
+
+
               <Button
                 variant="outline"
-                className="w-full mt-3 border-indigo-500 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-600"
+                size="sm"
                 onClick={handleLogout}
+                className="w-full border-indigo-500 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-600 transition-colors"
               >
                 Logout
               </Button>

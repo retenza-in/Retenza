@@ -20,6 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shop
         name: businesses.name,
         business_type: businesses.business_type,
         address: businesses.address,
+        gmap_link: businesses.gmap_link,
         logo_url: businesses.logo_url,
         loyaltyProgramId: loyaltyPrograms.id,
         pointsRate: loyaltyPrograms.points_rate,
@@ -50,6 +51,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shop
         name: shopData.name,
         business_type: shopData.business_type,
         address: shopData.address,
+        gmap_link: shopData.gmap_link,
         logo_url: shopData.logo_url,
       },
       loyaltyProgram: shopData.loyaltyProgramId ? {

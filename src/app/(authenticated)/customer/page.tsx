@@ -6,7 +6,6 @@ import { useAuthSession } from '@/hooks/useAuthSession';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import {
-  Trophy,
   TrendingUp,
   Store,
   Target,
@@ -49,7 +48,7 @@ export default function CustomerDashboard() {
   const router = useRouter();
   const [shops, setShops] = useState<Shop[]>([]);
   const [topMissions, setTopMissions] = useState<Mission[]>([]);
-  const [popularStores, setPopularStores] = useState<Shop[]>([]);
+
   const [quickStats, setQuickStats] = useState<QuickStats>({
     totalPoints: 0,
     totalShops: 0,
@@ -108,8 +107,8 @@ export default function CustomerDashboard() {
       // Refresh completed missions count
       const missionRegistryResponse = await fetch('/api/customer/mission-registry');
       if (missionRegistryResponse.ok) {
-        const missionRegistryData = await missionRegistryResponse.json() as Array<{ status: string }>;
-        const completedMissionsCount = missionRegistryData.filter((mission) => mission.status === 'completed').length;
+        const missionRegistryData = await missionRegistryResponse.json() as { success: boolean; registries: Array<{ status: string }> };
+        const completedMissionsCount = missionRegistryData.registries.filter((mission) => mission.status === 'completed').length;
         setQuickStats(prev => ({
           ...prev,
           missionsCompleted: completedMissionsCount
@@ -151,9 +150,9 @@ export default function CustomerDashboard() {
           try {
             const missionRegistryResponse = await fetch('/api/customer/mission-registry');
             if (missionRegistryResponse.ok) {
-              const missionRegistryData = await missionRegistryResponse.json() as Array<{ mission_id: string; status: string }>;
-              completedMissionsCount = missionRegistryData.filter((mission) => mission.status === 'completed').length;
-              missionRegistryData
+              const missionRegistryData = await missionRegistryResponse.json() as { success: boolean; registries: Array<{ mission_id: string; status: string }> };
+              completedMissionsCount = missionRegistryData.registries.filter((mission) => mission.status === 'completed').length;
+              missionRegistryData.registries
                 .filter((mission) => mission.status === 'in_progress')
                 .forEach((mission) => ongoingMissionIds.add(mission.mission_id));
             }
@@ -172,9 +171,7 @@ export default function CustomerDashboard() {
           });
           setOngoingMissions(ongoingMissionIds);
 
-          // Set popular stores (shops with highest points)
-          const sortedShops = [...data.shops].sort((a, b) => b.loyaltyPoints - a.loyaltyPoints);
-          setPopularStores(sortedShops.slice(0, 4));
+
 
         } catch (err: unknown) {
           const errorMessage = (err as Error)?.message ?? 'Error loading dashboard data';
@@ -238,7 +235,7 @@ export default function CustomerDashboard() {
             Your Loyalty Dashboard
           </h1>
           <p className="text-base text-gray-600 max-w-xl mx-auto">
-            Track your progress, discover new missions, and unlock exclusive rewards.
+            Track your progress, discover new shops, and unlock exclusive rewards.
           </p>
         </motion.div>
 
@@ -537,11 +534,11 @@ export default function CustomerDashboard() {
               )}
             </div>
 
-            {/* New Missions from New Shops */}
+            {/* Discover New Shops */}
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <Target className="w-5 h-5 text-green-500" />
-                Discover New Missions
+                Discover New Shops
               </h2>
 
               <Card className="border-2 border-dashed border-green-300 bg-green-50">
@@ -549,9 +546,9 @@ export default function CustomerDashboard() {
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Target className="w-6 h-6 text-green-600" />
                   </div>
-                  <h3 className="font-semibold text-gray-800 mb-2">Explore New Stores</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">See What&apos;s Trending</h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    Visit new shops to discover exclusive missions and earn bonus rewards!
+                    Explore trending shops and discover exclusive missions with bonus rewards!
                   </p>
                   <Button
                     onClick={() => router.push('/customer/shops')}
@@ -600,71 +597,7 @@ export default function CustomerDashboard() {
           </div>
         </motion.div>
 
-        {/* Popular Stores Section */}
-        {popularStores.length > 0 && (
-          <motion.div
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            transition={{ delay: 0.4 }}
-            className="mb-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-amber-500" />
-                Your Top Performing Shops
-              </h2>
-              <Button
-                onClick={() => router.push('/customer/shops')}
-                variant="outline"
-                size="sm"
-                className="border-green-200 text-green-600 hover:bg-green-50"
-              >
-                View All
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {popularStores.map((store, index) => (
-                <Card
-                  key={store.shopId}
-                  className="border border-gray-200 hover:border-green-300 hover:shadow-md transition-all duration-200 cursor-pointer group"
-                  onClick={() => router.push(`/customer/shops/${store.shopId}`)}
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700 border-amber-200">
-                        #{index + 1}
-                      </Badge>
-                      <Trophy className="w-4 h-4 text-amber-500" />
-                    </div>
-                    <CardTitle className="text-sm font-semibold text-gray-800 group-hover:text-green-600 transition-colors">
-                      {store.shopName}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Badge variant="outline" className="text-xs border-gray-300 text-gray-600">
-                      {store.shopType}
-                    </Badge>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">{store.loyaltyPoints} pts</span>
-                      <span className="font-medium text-gray-800">{store.currentTier}</span>
-                    </div>
-                    <div className="pt-2">
-                      <Button
-                        size="sm"
-                        className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </motion.div>
-        )}
 
         {/* Footer */}
         <motion.div

@@ -24,6 +24,7 @@ const businessInfoSchema = z.object({
   contact_number_2: phoneNumberSchema.optional().or(z.literal('')),
   address: z.string().min(5, 'Address is required.'),
   business_type: z.string().min(1, 'Business type is required.'),
+  email: z.string().email('Please enter a valid email address.').optional().or(z.literal('')),
   password: z.string().min(8, 'Password must be at least 8 characters.'),
   confirmPassword: z.string().min(8, 'Please confirm your password.'),
 }).refine(data => data.password === data.confirmPassword, {

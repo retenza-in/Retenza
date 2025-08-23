@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import {
@@ -45,6 +46,7 @@ interface ShopData {
     name: string;
     business_type: string;
     address: string;
+    gmap_link?: string;
     logo_url?: string;
   };
   loyaltyProgram: {
@@ -181,6 +183,21 @@ export default function ShopDetailsPage() {
                 <MapPin className="w-4 h-4" />
                 <span>{shop.address}</span>
               </div>
+
+              {/* Location Button - Only show if gmap_link exists */}
+              {shop.gmap_link && (
+                <div className="mt-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(shop.gmap_link, '_blank')}
+                    className="border-green-200 text-green-700 hover:bg-green-50"
+                  >
+                    <MapPin className="w-4 h-4 mr-2" />
+                    Get Directions
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-4">
               {/* Auto-subscribed to notifications when transactions occur */}

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import BusinessApprovalWrapper from '@/components/BusinessApprovalWrapper';
 import { motion } from 'framer-motion';
 import {
     Building2,
@@ -74,6 +75,7 @@ export default function BusinessProfilePage() {
 
         // Contact Information
         { key: 'address', label: 'Address', type: 'text', placeholder: 'Business address', required: false, category: 'contact' },
+        { key: 'email', label: 'Business Email', type: 'email', placeholder: 'Business email address', required: false, category: 'contact' },
         { key: 'contact_number', label: 'Primary Phone', type: 'tel', placeholder: 'Primary contact number', required: false, category: 'contact' },
         { key: 'contact_number_2', label: 'Secondary Phone', type: 'tel', placeholder: 'Secondary contact number', required: false, category: 'contact' },
         { key: 'gmap_link', label: 'Google Maps Link', type: 'url', placeholder: 'Google Maps URL for your business location', required: false, category: 'contact' },
@@ -456,249 +458,251 @@ export default function BusinessProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-            <div className="container mx-auto py-8 px-4">
-                {/* Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center mb-8"
-                >
-                    <div className="inline-flex items-center bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-3">
-                        <Building2 className="w-4 h-4 mr-2" />
-                        Business Profile
-                    </div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                        Manage Your Business Profile
-                    </h1>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        Keep your business information up-to-date to provide the best experience for your customers.
-                    </p>
-                </motion.div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Basic Information */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.1 }}
-                    >
-                        <Card className="h-fit">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Building2 className="w-5 h-5 text-blue-600" />
-                                    Basic Information
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {editableFields
-                                    .filter(field => field.category === 'basic')
-                                    .map(field => (
-                                        <div key={field.key} className="space-y-2">
-                                            {renderField(field)}
-                                        </div>
-                                    ))}
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    {/* Contact Information */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        <Card className="h-fit">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Phone className="w-5 h-5 text-green-600" />
-                                    Contact Information
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {editableFields
-                                    .filter(field => field.category === 'contact')
-                                    .map(field => (
-                                        <div key={field.key} className="space-y-2">
-                                            {renderField(field)}
-                                        </div>
-                                    ))}
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    {/* Business Details */}
+        <BusinessApprovalWrapper>
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+                <div className="container mx-auto py-8 px-4">
+                    {/* Header */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
+                        className="text-center mb-8"
                     >
-                        <Card className="h-fit">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Image className="w-5 h-5 text-orange-600" />
-                                    Business Details
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {/* Logo Upload Section */}
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-700">Company Logo</p>
-                                            <p className="text-xs text-gray-500">Upload your company logo (PNG, JPEG, GIF, WebP, SVG)</p>
+                        <div className="inline-flex items-center bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-3">
+                            <Building2 className="w-4 h-4 mr-2" />
+                            Business Profile
+                        </div>
+                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                            Manage Your Business Profile
+                        </h1>
+                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                            Keep your business information up-to-date to provide the best experience for your customers.
+                        </p>
+                    </motion.div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Basic Information */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1 }}
+                        >
+                            <Card className="h-fit">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Building2 className="w-5 h-5 text-blue-600" />
+                                        Basic Information
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {editableFields
+                                        .filter(field => field.category === 'basic')
+                                        .map(field => (
+                                            <div key={field.key} className="space-y-2">
+                                                {renderField(field)}
+                                            </div>
+                                        ))}
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Contact Information */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            <Card className="h-fit">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Phone className="w-5 h-5 text-green-600" />
+                                        Contact Information
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {editableFields
+                                        .filter(field => field.category === 'contact')
+                                        .map(field => (
+                                            <div key={field.key} className="space-y-2">
+                                                {renderField(field)}
+                                            </div>
+                                        ))}
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Business Details */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                        >
+                            <Card className="h-fit">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Image className="w-5 h-5 text-orange-600" />
+                                        Business Details
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {/* Logo Upload Section */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-700">Company Logo</p>
+                                                <p className="text-xs text-gray-500">Upload your company logo (PNG, JPEG, GIF, WebP, SVG)</p>
+                                            </div>
+                                            <Button
+                                                onClick={() => document.getElementById('logo-upload')?.click()}
+                                                size="sm"
+                                                className="bg-blue-600 hover:bg-blue-700"
+                                            >
+                                                <Upload className="w-4 h-4 mr-2" />
+                                                Upload Logo
+                                            </Button>
                                         </div>
-                                        <Button
-                                            onClick={() => document.getElementById('logo-upload')?.click()}
-                                            size="sm"
-                                            className="bg-blue-600 hover:bg-blue-700"
-                                        >
-                                            <Upload className="w-4 h-4 mr-2" />
-                                            Upload Logo
-                                        </Button>
+
+                                        <input
+                                            id="logo-upload"
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleLogoUpload}
+                                        />
+
+                                        {profile?.logo_url && (
+                                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                <img
+                                                    src={profile.logo_url}
+                                                    alt="Company Logo"
+                                                    className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        target.style.display = 'none';
+                                                    }}
+                                                />
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium text-gray-900">Current Logo</p>
+                                                    <p className="text-xs text-gray-500">Click edit to change the URL</p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <input
-                                        id="logo-upload"
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleLogoUpload}
-                                    />
+                                    {editableFields
+                                        .filter(field => field.category === 'details')
+                                        .map(field => (
+                                            <div key={field.key} className="space-y-2">
+                                                {renderField(field)}
+                                            </div>
+                                        ))}
+                                </CardContent>
+                            </Card>
+                        </motion.div>
 
-                                    {profile?.logo_url && (
-                                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                            <img
-                                                src={profile.logo_url}
-                                                alt="Company Logo"
-                                                className="w-16 h-16 object-cover rounded-lg border border-gray-200"
-                                                onError={(e) => {
-                                                    const target = e.target as HTMLImageElement;
-                                                    target.style.display = 'none';
-                                                }}
-                                            />
-                                            <div className="flex-1">
-                                                <p className="text-sm font-medium text-gray-900">Current Logo</p>
-                                                <p className="text-xs text-gray-500">Click edit to change the URL</p>
+                        {/* Custom Fields */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                        >
+                            <Card className="h-fit">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Plus className="w-5 h-5 text-purple-600" />
+                                        Custom Fields
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {renderCustomFields()}
+
+                                    {!showAddField ? (
+                                        <Button
+                                            onClick={() => setShowAddField(true)}
+                                            variant="outline"
+                                            className="w-full border-dashed border-2 border-gray-300 hover:border-gray-400"
+                                        >
+                                            <Plus className="w-4 h-4 mr-2" />
+                                            Add Custom Field
+                                        </Button>
+                                    ) : (
+                                        <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <Label htmlFor="fieldKey" className="text-xs">Field Key</Label>
+                                                    <Input
+                                                        id="fieldKey"
+                                                        value={newField.key}
+                                                        onChange={(e) => setNewField(prev => ({ ...prev, key: e.target.value }))}
+                                                        placeholder="e.g., specialties"
+                                                        className="text-sm"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label htmlFor="fieldLabel" className="text-xs">Display Label</Label>
+                                                    <Input
+                                                        id="fieldLabel"
+                                                        value={newField.label}
+                                                        onChange={(e) => setNewField(prev => ({ ...prev, label: e.target.value }))}
+                                                        placeholder="e.g., Specialties"
+                                                        className="text-sm"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <Label htmlFor="fieldType" className="text-xs">Field Type</Label>
+                                                    <select
+                                                        id="fieldType"
+                                                        value={newField.type}
+                                                        onChange={(e) => setNewField(prev => ({ ...prev, type: e.target.value as any }))}
+                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
+                                                    >
+                                                        <option value="text">Text</option>
+                                                        <option value="textarea">Long Text</option>
+                                                        <option value="email">Email</option>
+                                                        <option value="url">URL</option>
+                                                        <option value="tel">Phone</option>
+                                                    </select>
+                                                </div>
+                                                <div className="flex items-end">
+                                                    <label className="flex items-center gap-2 text-xs">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={newField.required}
+                                                            onChange={(e) => setNewField(prev => ({ ...prev, required: e.target.checked }))}
+                                                            className="rounded"
+                                                        />
+                                                        Required
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    onClick={addCustomField}
+                                                    disabled={saving || !newField.key || !newField.label}
+                                                    size="sm"
+                                                    className="flex-1"
+                                                >
+                                                    {saving ? 'Adding...' : 'Add Field'}
+                                                </Button>
+                                                <Button
+                                                    onClick={() => setShowAddField(false)}
+                                                    variant="outline"
+                                                    size="sm"
+                                                >
+                                                    Cancel
+                                                </Button>
                                             </div>
                                         </div>
                                     )}
-                                </div>
-
-                                {editableFields
-                                    .filter(field => field.category === 'details')
-                                    .map(field => (
-                                        <div key={field.key} className="space-y-2">
-                                            {renderField(field)}
-                                        </div>
-                                    ))}
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    {/* Custom Fields */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                    >
-                        <Card className="h-fit">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Plus className="w-5 h-5 text-purple-600" />
-                                    Custom Fields
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {renderCustomFields()}
-
-                                {!showAddField ? (
-                                    <Button
-                                        onClick={() => setShowAddField(true)}
-                                        variant="outline"
-                                        className="w-full border-dashed border-2 border-gray-300 hover:border-gray-400"
-                                    >
-                                        <Plus className="w-4 h-4 mr-2" />
-                                        Add Custom Field
-                                    </Button>
-                                ) : (
-                                    <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <Label htmlFor="fieldKey" className="text-xs">Field Key</Label>
-                                                <Input
-                                                    id="fieldKey"
-                                                    value={newField.key}
-                                                    onChange={(e) => setNewField(prev => ({ ...prev, key: e.target.value }))}
-                                                    placeholder="e.g., specialties"
-                                                    className="text-sm"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label htmlFor="fieldLabel" className="text-xs">Display Label</Label>
-                                                <Input
-                                                    id="fieldLabel"
-                                                    value={newField.label}
-                                                    onChange={(e) => setNewField(prev => ({ ...prev, label: e.target.value }))}
-                                                    placeholder="e.g., Specialties"
-                                                    className="text-sm"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <Label htmlFor="fieldType" className="text-xs">Field Type</Label>
-                                                <select
-                                                    id="fieldType"
-                                                    value={newField.type}
-                                                    onChange={(e) => setNewField(prev => ({ ...prev, type: e.target.value as any }))}
-                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
-                                                >
-                                                    <option value="text">Text</option>
-                                                    <option value="textarea">Long Text</option>
-                                                    <option value="email">Email</option>
-                                                    <option value="url">URL</option>
-                                                    <option value="tel">Phone</option>
-                                                </select>
-                                            </div>
-                                            <div className="flex items-end">
-                                                <label className="flex items-center gap-2 text-xs">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={newField.required}
-                                                        onChange={(e) => setNewField(prev => ({ ...prev, required: e.target.checked }))}
-                                                        className="rounded"
-                                                    />
-                                                    Required
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex gap-2">
-                                            <Button
-                                                onClick={addCustomField}
-                                                disabled={saving || !newField.key || !newField.label}
-                                                size="sm"
-                                                className="flex-1"
-                                            >
-                                                {saving ? 'Adding...' : 'Add Field'}
-                                            </Button>
-                                            <Button
-                                                onClick={() => setShowAddField(false)}
-                                                variant="outline"
-                                                size="sm"
-                                            >
-                                                Cancel
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </motion.div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </BusinessApprovalWrapper>
     );
 } 

@@ -14,6 +14,7 @@ CREATE TABLE "businesses" (
     "address" text,
     "business_type" varchar(50),
     "contact_number_2" varchar(20),
+    "email" varchar(255),
     "is_setup_complete" boolean DEFAULT false NOT NULL,
     "created_at" timestamp DEFAULT now() NOT NULL,
     "updated_at" timestamp DEFAULT now() NOT NULL,

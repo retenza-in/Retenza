@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from 'next/navigation';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { toast } from 'react-toastify';
@@ -20,8 +19,10 @@ import {
   XCircle,
   TrendingUp,
   Calendar,
-  MapPin,
-  Sparkles
+  Sparkles,
+  Filter,
+  Grid3X3,
+  List
 } from 'lucide-react';
 
 interface Mission {
@@ -64,19 +65,22 @@ interface CompanyMissions {
   missions: Mission[];
 }
 
+interface MissionWithProgress extends Mission {
+  progress?: MissionRegistry;
+  company: CompanyMissions;
+}
+
 export default function CustomerMissionsPage() {
   const { user, role, loading } = useAuthSession();
   const router = useRouter();
 
   const [companyMissions, setCompanyMissions] = useState<CompanyMissions[]>([]);
-
   const [missionProgress, setMissionProgress] = useState<MissionRegistry[]>([]);
-
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCompany, setSelectedCompany] = useState<string>('all');
   const [missionsLoading, setMissionsLoading] = useState(true);
-  const [progressLoading, setProgressLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     if (!loading && (!user || role !== 'user')) {
@@ -99,46 +103,25 @@ export default function CustomerMissionsPage() {
       if (!response.ok) {
         throw new Error('Failed to fetch missions.');
       }
-      const data = await response.json() as Mission[];
-
-      const grouped = data.reduce((acc: CompanyMissions[], mission) => {
-        const existing = acc.find(c => c.business_id === mission.business_id);
-        if (existing) {
-          existing.missions.push(mission);
-        } else {
-          acc.push({
-            business_id: mission.business_id,
-            business_name: mission.business_name,
-            business_address: mission.business_address,
-            missions: [mission]
-          });
-        }
-        return acc;
-      }, []);
-
-      setCompanyMissions(grouped);
-    } catch (err: unknown) {
-      const errorMessage = (err as Error)?.message ?? 'Error loading missions';
-      setError(errorMessage);
-      toast.error(errorMessage);
+      const data = await response.json();
+      setCompanyMissions(data);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to fetch missions.');
     } finally {
       setMissionsLoading(false);
     }
   };
 
   const fetchMissionProgress = async () => {
-    setProgressLoading(true);
     try {
       const response = await fetch('/api/customer/mission-registry');
       if (!response.ok) {
         throw new Error('Failed to fetch mission progress.');
       }
-      const data = await response.json() as { registries: MissionRegistry[] };
+      const data = await response.json();
       setMissionProgress(data.registries ?? []);
-    } catch (err: unknown) {
-      console.error('Error fetching mission progress:', err);
-    } finally {
-      setProgressLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch mission progress:', error);
     }
   };
 
@@ -146,54 +129,38 @@ export default function CustomerMissionsPage() {
     try {
       const response = await fetch('/api/customer/mission-registry', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           mission_id: mission.id,
-          business_id: mission.business_id
-        })
+          business_id: mission.business_id,
+        }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error ?? 'Failed to start mission');
+        throw new Error(errorData.error ?? 'Failed to start mission.');
       }
 
-      toast.success(`Mission "${mission.title}" started successfully!`);
-      void fetchMissionProgress(); // Refresh progress
-    } catch (err: unknown) {
-      const errorMessage = (err as Error)?.message ?? 'Error starting mission';
+      toast.success('Mission started successfully!');
+      void fetchMissionProgress();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to start mission';
       toast.error(errorMessage);
     }
   };
 
-  const filteredCompanyMissions = companyMissions.filter(company => {
-    if (selectedCompany !== 'all' && company.business_name !== selectedCompany) {
-      return false;
-    }
-
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      return company.missions.some(mission =>
-        mission.title.toLowerCase().includes(searchLower) ||
-        mission.description.toLowerCase().includes(searchLower) ||
-        mission.offer.toLowerCase().includes(searchLower) ||
-        company.business_name.toLowerCase().includes(searchLower)
-      );
-    }
-
-    return true;
-  });
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'in_progress':
-        return <PlayCircle className="w-5 h-5 text-blue-600" />;
+        return <Clock className="w-3 h-3" />;
       case 'completed':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
+        return <CheckCircle className="w-3 h-3" />;
       case 'failed':
-        return <XCircle className="w-5 h-5 text-red-600" />;
+        return <XCircle className="w-3 h-3" />;
       default:
-        return <Clock className="w-5 h-5 text-gray-600" />;
+        return <Clock className="w-3 h-3" />;
     }
   };
 
@@ -210,10 +177,36 @@ export default function CustomerMissionsPage() {
     }
   };
 
+  // Flatten all missions into a single array with progress info
+  const allMissions: MissionWithProgress[] = (companyMissions || []).flatMap(company =>
+    (company.missions || []).map(mission => {
+      const progress = missionProgress.find(p => p.mission_id === mission.id);
+      return {
+        ...mission,
+        progress,
+        company
+      };
+    })
+  );
+
+  // Filter missions based on search and company
+  const filteredMissions = allMissions.filter(mission => {
+    const matchesSearch = (mission.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (mission.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (mission.business_name || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCompany = selectedCompany === 'all' || mission.business_name === selectedCompany;
+    return matchesSearch && matchesCompany;
+  });
+
+  // Group missions by status for better organization
+  const availableMissions = filteredMissions.filter(m => !m.progress);
+  const inProgressMissions = filteredMissions.filter(m => m.progress?.status === 'in_progress');
+  const completedMissions = filteredMissions.filter(m => m.progress?.status === 'completed');
+
   if (loading || missionsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="container mx-auto py-12 px-4">
+        <div className="container mx-auto py-8 px-4">
           <div className="flex justify-center items-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -228,7 +221,7 @@ export default function CustomerMissionsPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="container mx-auto py-12 px-4">
+        <div className="container mx-auto py-8 px-4">
           <div className="flex justify-center items-center h-64">
             <div className="text-center">
               <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
@@ -247,9 +240,72 @@ export default function CustomerMissionsPage() {
     return null;
   }
 
+  const MissionCard = ({ mission, isProgress = false }: { mission: MissionWithProgress; isProgress?: boolean }) => (
+    <Card className={`border-2 hover:shadow-lg transition-all duration-300 ${isProgress ? 'border-blue-200' : 'border-gray-200 hover:border-blue-300'
+      }`}>
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-blue-600" />
+            <span className="text-sm font-medium text-blue-600">{mission.business_name}</span>
+          </div>
+          {isProgress && mission.progress && (
+            <Badge className={getStatusColor(mission.progress.status)}>
+              {getStatusIcon(mission.progress.status)}
+              <span className="ml-1 capitalize">{mission.progress.status.replace('_', ' ')}</span>
+            </Badge>
+          )}
+        </div>
+
+        <CardTitle className="text-lg font-semibold text-gray-800 line-clamp-2">
+          {mission.title}
+        </CardTitle>
+
+        <CardDescription className="text-gray-600 line-clamp-2">
+          {mission.description}
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Gift className="w-4 h-4 text-green-600" />
+          <Badge className="bg-green-100 text-green-800 text-xs font-medium">
+            {mission.offer}
+          </Badge>
+        </div>
+
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Calendar className="w-4 h-4" />
+          <span>Expires: {new Date(mission.expires_at).toLocaleDateString()}</span>
+        </div>
+
+        {!isProgress && !mission.progress ? (
+          <Button
+            onClick={() => startMission(mission)}
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2 rounded-xl transition-all duration-300"
+          >
+            <PlayCircle className="w-4 h-4 mr-2" />
+            Start Mission
+          </Button>
+        ) : mission.progress?.status === 'completed' ? (
+          <Button disabled className="w-full bg-green-100 text-green-800 font-semibold py-2 rounded-xl">
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Completed
+          </Button>
+        ) : mission.progress?.status === 'in_progress' ? (
+          <Button disabled className="w-full bg-blue-100 text-blue-800 font-semibold py-2 rounded-xl">
+            <Clock className="w-4 h-4 mr-2" />
+            In Progress
+          </Button>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto py-12 px-4">
+      <div className="container mx-auto py-8 px-4">
+        {/* Compact Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Sparkles className="w-6 h-6 text-purple-600" />
@@ -258,235 +314,162 @@ export default function CustomerMissionsPage() {
             </h1>
           </div>
 
-          {/* Compact Search and Filter */}
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search missions..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-9 w-64 border border-gray-200 focus:border-blue-500 rounded-lg"
-              />
-            </div>
-
-            <select
-              value={selectedCompany}
-              onChange={(e) => setSelectedCompany(e.target.value)}
-              className="h-9 px-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm"
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="h-8 w-8 p-0"
             >
-              <option value="all">All Companies</option>
-              {companyMissions.map(company => (
-                <option key={company.business_id} value={company.business_name}>
-                  {company.business_name}
-                </option>
-              ))}
-            </select>
+              <Grid3X3 className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="h-8 w-8 p-0"
+            >
+              <List className="w-4 h-4" />
+            </Button>
           </div>
         </div>
 
-        <Tabs defaultValue="available" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-2 bg-white rounded-xl p-1 shadow-lg">
-            <TabsTrigger value="available" className="rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Target className="w-4 h-4 mr-2" />
-              Available Missions
-            </TabsTrigger>
-            <TabsTrigger value="progress" className="rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              My Progress
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="available" className="space-y-8">
-            {filteredCompanyMissions.length === 0 ? (
-              <div className="text-center py-16">
-                <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-xl text-gray-500">No missions found matching your criteria.</p>
-                <p className="text-gray-400">Try adjusting your search or filters.</p>
-              </div>
-            ) : (
-              filteredCompanyMissions.map(company => (
-                <div key={company.business_id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                  {/* Company Header */}
-                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Building2 className="w-6 h-6" />
-                      <h2 className="text-2xl font-bold">{company.business_name}</h2>
-                    </div>
-                    <div className="flex items-center gap-2 text-blue-100">
-                      <MapPin className="w-4 h-4" />
-                      <span>{company.business_address}</span>
-                    </div>
-                  </div>
-
-                  {/* Missions Grid */}
-                  <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {company.missions.map(mission => {
-                        const isInProgress = missionProgress.some(p => p.mission_id === mission.id && p.status === 'in_progress');
-                        const isCompleted = missionProgress.some(p => p.mission_id === mission.id && p.status === 'completed');
-
-                        return (
-                          <Card key={mission.id} className="border-2 hover:border-blue-300 transition-all duration-300 hover:shadow-xl">
-                            <CardHeader className="pb-3">
-                              <div className="flex items-start justify-between">
-                                <CardTitle className="text-lg font-semibold text-gray-800 line-clamp-2">
-                                  {mission.title}
-                                </CardTitle>
-                                {isInProgress && (
-                                  <Badge className="bg-blue-100 text-blue-800">
-                                    <PlayCircle className="w-3 h-3 mr-1" />
-                                    In Progress
-                                  </Badge>
-                                )}
-                                {isCompleted && (
-                                  <Badge className="bg-green-100 text-green-800">
-                                    <CheckCircle className="w-3 h-3 mr-1" />
-                                    Completed
-                                  </Badge>
-                                )}
-                              </div>
-                              <CardDescription className="text-gray-600 line-clamp-3">
-                                {mission.description}
-                              </CardDescription>
-                            </CardHeader>
-
-                            <CardContent className="space-y-4">
-                              <div className="flex items-center gap-2">
-                                <Gift className="w-4 h-4 text-green-600" />
-                                <Badge className="bg-green-100 text-green-800 font-medium">
-                                  {mission.offer}
-                                </Badge>
-                              </div>
-
-                              <div className="flex items-center gap-2 text-sm text-gray-500">
-                                <Calendar className="w-4 h-4" />
-                                <span>Expires: {new Date(mission.expires_at).toLocaleDateString()}</span>
-                              </div>
-
-                              {!isInProgress && !isCompleted ? (
-                                <Button
-                                  onClick={() => startMission(mission)}
-                                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2 rounded-xl transition-all duration-300"
-                                >
-                                  <PlayCircle className="w-4 h-4 mr-2" />
-                                  Start Mission
-                                </Button>
-                              ) : isCompleted ? (
-                                <Button disabled className="w-full bg-green-100 text-green-800 font-semibold py-2 rounded-xl">
-                                  <CheckCircle className="w-4 h-4 mr-2" />
-                                  Mission Completed
-                                </Button>
-                              ) : (
-                                <Button disabled className="w-full bg-blue-100 text-blue-800 font-semibold py-2 rounded-xl">
-                                  <Clock className="w-4 h-4 mr-2" />
-                                  Mission in Progress
-                                </Button>
-                              )}
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="progress" className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
-                Mission Progress
-              </h3>
-
-              {progressLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-gray-500 mt-2">Loading your progress...</p>
-                </div>
-              ) : missionProgress.length === 0 ? (
-                <div className="text-center py-12">
-                  <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-xl text-gray-500">No missions in progress yet.</p>
-                  <p className="text-gray-400">Start a mission to see your progress here!</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {missionProgress.map(registry => (
-                    <Card key={registry.id} className="border-2 hover:shadow-lg transition-all duration-300">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <CardTitle className="text-lg font-semibold text-gray-800 line-clamp-2">
-                            {registry.mission_title}
-                          </CardTitle>
-                          <Badge className={getStatusColor(registry.status)}>
-                            {getStatusIcon(registry.status)}
-                            <span className="ml-1 capitalize">{registry.status.replace('_', ' ')}</span>
-                          </Badge>
-                        </div>
-                        <CardDescription className="text-gray-600 line-clamp-2">
-                          {registry.mission_description}
-                        </CardDescription>
-                      </CardHeader>
-
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Building2 className="w-4 h-4" />
-                          <span className="font-medium">{registry.business_name}</span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Gift className="w-4 h-4 text-green-600" />
-                          <Badge className="bg-green-100 text-green-800 text-xs">
-                            {registry.mission_offer}
-                          </Badge>
-                        </div>
-
-                        <div className="space-y-2 text-sm text-gray-600">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4" />
-                            <span>Started: {new Date(registry.started_at).toLocaleDateString()}</span>
-                          </div>
-
-                          {registry.completed_at && (
-                            <div className="flex items-center gap-2">
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                              <span>Completed: {new Date(registry.completed_at).toLocaleDateString()}</span>
-                            </div>
-                          )}
-
-                          {registry.discount_amount && parseFloat(registry.discount_amount) > 0 && (
-                            <div className="flex items-center gap-2">
-                              <Gift className="w-4 h-4 text-green-600" />
-                              <span>Discount: ₹{parseFloat(registry.discount_amount).toFixed(2)}</span>
-                            </div>
-                          )}
-
-                          {registry.discount_percentage && parseFloat(registry.discount_percentage) > 0 && (
-                            <div className="flex items-center gap-2">
-                              <Gift className="w-4 h-4 text-green-600" />
-                              <span>Discount: {parseFloat(registry.discount_percentage).toFixed(1)}%</span>
-                            </div>
-                          )}
-
-                          {registry.notes && (
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs bg-gray-100 p-2 rounded">
-                                <strong>Notes:</strong> {registry.notes}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
+        {/* Smart Search and Filters */}
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search missions, companies, or descriptions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 h-10 border border-gray-200 focus:border-blue-500 rounded-lg"
+              />
             </div>
-          </TabsContent>
-        </Tabs>
+
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-500" />
+              <select
+                value={selectedCompany}
+                onChange={(e) => setSelectedCompany(e.target.value)}
+                className="h-10 px-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-sm"
+              >
+                <option value="all">All Companies</option>
+                {(companyMissions || []).map(company => (
+                  <option key={company.business_id} value={company.business_name}>
+                    {company.business_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Mission Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Target className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Available</p>
+                <p className="text-2xl font-bold text-gray-800">{availableMissions.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Clock className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">In Progress</p>
+                <p className="text-2xl font-bold text-gray-800">{inProgressMissions.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Completed</p>
+                <p className="text-2xl font-bold text-gray-800">{completedMissions.length}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Integrated Missions Grid */}
+        <div className="space-y-6">
+          {/* In Progress Missions */}
+          {inProgressMissions.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+                Active Missions ({inProgressMissions.length})
+              </h2>
+              <div className={`grid gap-4 ${viewMode === 'grid'
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                : 'grid-cols-1'
+                }`}>
+                {inProgressMissions.map(mission => (
+                  <MissionCard key={mission.id} mission={mission} isProgress={true} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Available Missions */}
+          {availableMissions.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <Target className="w-5 h-5 text-purple-600" />
+                Available Missions ({availableMissions.length})
+              </h2>
+              <div className={`grid gap-4 ${viewMode === 'grid'
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                : 'grid-cols-1'
+                }`}>
+                {availableMissions.map(mission => (
+                  <MissionCard key={mission.id} mission={mission} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Completed Missions */}
+          {completedMissions.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                Completed Missions ({completedMissions.length})
+              </h2>
+              <div className={`grid gap-4 ${viewMode === 'grid'
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                : 'grid-cols-1'
+                }`}>
+                {completedMissions.map(mission => (
+                  <MissionCard key={mission.id} mission={mission} isProgress={true} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {filteredMissions.length === 0 && (
+            <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
+              <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-xl text-gray-500">No missions found matching your criteria.</p>
+              <p className="text-gray-400">Try adjusting your search or filters.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

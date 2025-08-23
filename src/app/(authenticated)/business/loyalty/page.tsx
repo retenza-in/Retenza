@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import BusinessApprovalWrapper from '@/components/BusinessApprovalWrapper';
 import { Plus, Trophy, Users, TrendingUp, Settings } from 'lucide-react';
 import { TierManager, type Tier } from '@/components/TierManager';
 import { NewTierForm } from '@/components/NewTierForm';
@@ -188,149 +189,151 @@ export default function LoyaltyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header Section */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Loyalty Program</h1>
-              <p className="text-gray-600">Manage your customer loyalty tiers and rewards</p>
-            </div>
-            <Button
-              onClick={() => setShowNewTierForm(true)}
-              disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-lg"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add New Tier
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {program && (
-        <div className="container mx-auto px-4 py-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card className="border border-gray-200 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Trophy className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Tiers</p>
-                    <p className="text-2xl font-bold text-gray-900">{program.tiers.length}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-gray-200 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Users className="w-6 h-6 text-green-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Points Rate</p>
-                    <p className="text-2xl font-bold text-gray-900">{program.points_rate}:1</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-gray-200 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <TrendingUp className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Rewards</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {program.tiers.reduce((sum, tier) => sum + tier.rewards.length, 0)}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-gray-200 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-amber-100 rounded-lg">
-                    <Settings className="w-6 h-6 text-amber-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Status</p>
-                    <Badge className="bg-green-100 text-green-800 border-green-200">
-                      Active
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      <div className="container mx-auto px-4 pb-8">
-        {!program ? (
-          <Card className="border border-gray-200 shadow-sm">
-            <CardContent className="p-12 text-center">
-              <div className="max-w-md mx-auto">
-                <div className="p-4 bg-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Trophy className="w-8 h-8 text-blue-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Loyalty Program Yet</h3>
-                <p className="text-gray-600 mb-6">
-                  Create your first loyalty tier to start rewarding your customers and building long-term relationships.
-                </p>
-                <Button
-                  onClick={() => setShowNewTierForm(true)}
-                  disabled={saving}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create First Tier
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-6">
+    <BusinessApprovalWrapper>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header Section */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="container mx-auto px-4 py-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Loyalty Tiers</h2>
-              <p className="text-gray-600">
-                {program.tiers.length} tier{program.tiers.length !== 1 ? 's' : ''} configured
-              </p>
-            </div>
-
-            {program.tiers.map((tier, index) => (
-              <TierManager
-                key={tier.id ?? index}
-                tier={tier}
-                onTierChange={(updatedTier) => handleUpdateTier(updatedTier, index)}
-                onDelete={() => handleDeleteTier(index)}
-                onMoveUp={index > 0 ? () => handleMoveTier(index, 'up') : undefined}
-                onMoveDown={index < program.tiers.length - 1 ? () => handleMoveTier(index, 'down') : undefined}
-                canMoveUp={index > 0}
-                canMoveDown={index < program.tiers.length - 1}
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Loyalty Program</h1>
+                <p className="text-gray-600">Manage your customer loyalty tiers and rewards</p>
+              </div>
+              <Button
+                onClick={() => setShowNewTierForm(true)}
                 disabled={saving}
-              />
-            ))}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-lg"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Add New Tier
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {program && (
+          <div className="container mx-auto px-4 py-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <Card className="border border-gray-200 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Trophy className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Total Tiers</p>
+                      <p className="text-2xl font-bold text-gray-900">{program.tiers.length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-gray-200 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <Users className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Points Rate</p>
+                      <p className="text-2xl font-bold text-gray-900">{program.points_rate}:1</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-gray-200 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <TrendingUp className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Total Rewards</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {program.tiers.reduce((sum, tier) => sum + tier.rewards.length, 0)}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-gray-200 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <div className="p-2 bg-amber-100 rounded-lg">
+                      <Settings className="w-6 h-6 text-amber-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Status</p>
+                      <Badge className="bg-green-100 text-green-800 border-green-200">
+                        Active
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )}
-      </div>
 
-      {/* New Tier Form Modal */}
-      <NewTierForm
-        isOpen={showNewTierForm}
-        onClose={() => setShowNewTierForm(false)}
-        onSave={handleSaveTier}
-        disabled={saving}
-      />
-    </div>
+        <div className="container mx-auto px-4 pb-8">
+          {!program ? (
+            <Card className="border border-gray-200 shadow-sm">
+              <CardContent className="p-12 text-center">
+                <div className="max-w-md mx-auto">
+                  <div className="p-4 bg-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <Trophy className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No Loyalty Program Yet</h3>
+                  <p className="text-gray-600 mb-6">
+                    Create your first loyalty tier to start rewarding your customers and building long-term relationships.
+                  </p>
+                  <Button
+                    onClick={() => setShowNewTierForm(true)}
+                    disabled={saving}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create First Tier
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">Loyalty Tiers</h2>
+                <p className="text-gray-600">
+                  {program.tiers.length} tier{program.tiers.length !== 1 ? 's' : ''} configured
+                </p>
+              </div>
+
+              {program.tiers.map((tier, index) => (
+                <TierManager
+                  key={tier.id ?? index}
+                  tier={tier}
+                  onTierChange={(updatedTier) => handleUpdateTier(updatedTier, index)}
+                  onDelete={() => handleDeleteTier(index)}
+                  onMoveUp={index > 0 ? () => handleMoveTier(index, 'up') : undefined}
+                  onMoveDown={index < program.tiers.length - 1 ? () => handleMoveTier(index, 'down') : undefined}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < program.tiers.length - 1}
+                  disabled={saving}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* New Tier Form Modal */}
+        <NewTierForm
+          isOpen={showNewTierForm}
+          onClose={() => setShowNewTierForm(false)}
+          onSave={handleSaveTier}
+          disabled={saving}
+        />
+      </div>
+    </BusinessApprovalWrapper>
   );
 }
