@@ -260,7 +260,7 @@ export function BusinessInfoForm({
                                         placeholder="business@example.com"
                                         className="mt-1 focus:border-blue-500 focus:ring-blue-500 border-gray-300"
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">We'll use this to send you important updates and notifications</p>
+                                    <p className="text-xs text-gray-500 mt-1">We&apos;ll use this to send you important updates and notifications</p>
                                     {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message ? String(errors.email.message) : 'Invalid input'}</p>}
                                 </div>
 
