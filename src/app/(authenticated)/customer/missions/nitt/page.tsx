@@ -110,7 +110,7 @@ export default function CustomerMissionsPage() {
       const data = await response.json() as CompanyMissions[];
 
       setCompanyMissions(
-        data.filter(mission => !mission.business_region.toLowerCase().includes("nit trichy"))
+        data.filter(mission => mission.business_region.toLowerCase().includes("nit trichy"))
       );
     } catch (error) {
       console.error('Error fetching missions:', error);
@@ -374,7 +374,7 @@ export default function CustomerMissionsPage() {
           <div className="flex items-center gap-3">
             <Sparkles className="w-6 h-6 text-purple-600" />
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Mission Dashboard
+              NIT Trichy Missions
             </h1>
           </div>
 

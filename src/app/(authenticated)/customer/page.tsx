@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { toast } from 'react-toastify';
@@ -40,6 +40,7 @@ interface Mission {
   offer: string;
   business_name: string;
   business_id: number;
+  business_region: string;
 }
 
 interface QuickStats {
@@ -52,7 +53,15 @@ export default function CustomerDashboard() {
   const { user, role, loading: authLoading } = useAuthSession();
   const router = useRouter();
   const [shops, setShops] = useState<Shop[]>([]);
-  const [topMissions, setTopMissions] = useState<Mission[]>([]);
+  const [allMissions, setAllMissions] = useState<Mission[]>([]);
+  const [topMissions, nittMissions] = useMemo(() => {
+    const topMissions: Mission[] = [], nittMissions: Mission[] = []
+    allMissions.forEach(mission => {
+      if (mission.business_region.toLowerCase().includes("nit trichy")) nittMissions.push(mission)
+      else if (topMissions.length < 3) topMissions.push(mission)
+    })
+    return [topMissions, nittMissions]
+  }, [allMissions])
 
   const [quickStats, setQuickStats] = useState<QuickStats>({
     totalPoints: 0,
@@ -145,7 +154,7 @@ export default function CustomerDashboard() {
           }))
         );
         console.log('Refreshed flattened missions:', allMissions);
-        setTopMissions(allMissions.slice(0, 3));
+        setAllMissions(allMissions)
       }
 
       // Refresh completed missions count
@@ -184,17 +193,18 @@ export default function CustomerDashboard() {
           // Fetch top missions
           const missionsResponse = await fetch('/api/customer/missions');
           if (missionsResponse.ok) {
-            const missionsData = await missionsResponse.json() as { business_id: number; business_name: string; business_address: string; missions: Mission[] }[];
+            const missionsData = await missionsResponse.json() as { business_id: number; business_name: string; business_address: string; business_region: string | null, missions: Mission[] }[];
             console.log('Raw missions data:', missionsData);
             // Flatten missions from all businesses and take top 3
             const allMissions = missionsData.flatMap(company =>
               company.missions.map(mission => ({
                 ...mission,
-                business_name: company.business_name
+                business_name: company.business_name,
+                business_region: company.business_region || ""
               }))
             );
             console.log('Flattened missions:', allMissions);
-            setTopMissions(allMissions.slice(0, 3)); // Top 3 missions
+            setAllMissions(allMissions);
           }
 
           // Fetch mission registry data (completed and ongoing)
@@ -404,6 +414,108 @@ export default function CustomerDashboard() {
             </Card>
           )}
         </motion.div> */}
+
+        {/* NITT Missions Section */}
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={fadeUp}
+          transition={{ delay: 0.3 }}
+          className="mb-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-fuchsia-500" />
+              NIT Trichy Missions
+            </h2>
+            <Button
+              onClick={() => router.push('/customer/missions/nitt')}
+              variant="outline"
+              size="sm"
+              className="border-blue-200 text-blue-600 hover:bg-blue-50"
+            >
+              View All
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+
+          {nittMissions.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {nittMissions.slice(0,3).map((mission, index) => (
+                <Card key={mission.id} className="border border-gray-200 hover:border-fuchsia-300 hover:shadow-md transition-all duration-200 group">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="secondary" className="text-xs bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200">
+                        #{index + 1}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs text-fuchsia-600 border-red-200">
+                        Limited Time
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-sm font-semibold text-gray-800 group-hover:text-fuchsia-600 transition-colors line-clamp-2">
+                      {mission.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-xs text-gray-600 line-clamp-2">{mission.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-green-600">{mission.offer}</span>
+                      <span className="text-xs text-gray-500">{mission.business_name}</span>
+                    </div>
+
+                    {ongoingMissions.has(mission.id) ? (
+                      <Button asChild className="w-full bg-gray-400 hover:bg-gray-400 text-white text-xs">
+                        <div className='flex items-center'>
+                          <span className='flex grow items-center'>
+                            <Clock className="w-4 h-4 mr-2 inline-block" />
+                            In Progress
+                          </span>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger>
+                              <MoreVertical className="w-4 h-4 ml-4 inline-block" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className='bg-white'>
+                              <DropdownMenuItem onClick={() => cancelMission(mission)}>
+                                Quit
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => startMission(mission.id, mission.business_id)}
+                        disabled={startingMission === mission.id}
+                        size="sm"
+                        className="w-full bg-fuchsia-600 hover:bg-fuchsia-700 text-white text-xs"
+                      >
+                        {startingMission === mission.id ? (
+                          <>
+                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                            Starting...
+                          </>
+                        ) : (
+                          <>
+                            <Target className="w-3 h-3 mr-1" />
+                            Start Mission
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="border-2 border-dashed border-gray-300 bg-gray-50">
+              <CardContent className="p-6 text-center">
+                <Target className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">No missions available yet. Check back soon!</p>
+              </CardContent>
+            </Card>
+          )}
+        </motion.div>
 
         {/* Top Missions Section */}
         <motion.div
