@@ -1,10 +1,11 @@
 "use client"
 import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge, Building2, Calendar, CheckCircle, Clock, Gift, MoreVertical, PlayCircle, XCircle } from 'lucide-react';
+import { Building2, Calendar, CheckCircle, Clock, Gift, MoreVertical, PlayCircle, XCircle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { toast } from 'react-toastify';
+import { Badge } from '../ui/badge';
 
 interface Mission {
   id: number;
