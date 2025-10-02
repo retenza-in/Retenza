@@ -1,6 +1,6 @@
-import { db } from "@/server/db";
-import { businesses, loyaltyPrograms } from "@/server/db/schema";
-import type { Tier } from "@/server/db/schema";
+import { db } from "@/db";
+import { businesses, loyaltyPrograms } from "@/db/schema";
+import type { Tier } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";

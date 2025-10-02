@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromSession } from '@/lib/session';
-import { db } from '@/server/db';
-import { customers, customerLoyalty, loyaltyPrograms, rewardRedemptions, pushSubscriptions } from '@/server/db/schema';
+import { db } from '@/db';
+import { customers, customerLoyalty, loyaltyPrograms, rewardRedemptions, pushSubscriptions } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { Tier } from '@/server/db/schema';
+import { Tier } from '@/db/schema';
 import { ServerPushNotificationService } from '@/lib/server/pushNotificationService';
 
 export async function GET(req: NextRequest) {

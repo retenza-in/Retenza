@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCustomerFromSession } from '@/lib/session';
-import { db } from '@/server/db';
-import { missionRegistry, missions, notifications } from '@/server/db/schema';
+import { db } from '@/db';
+import { missionRegistry, missions, notifications } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 // Get customer's mission registries

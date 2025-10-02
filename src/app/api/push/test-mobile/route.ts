@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { db } from '@/server/db';
-import { pushSubscriptions } from '@/server/db/schema';
+import { db } from '@/db';
+import { pushSubscriptions } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import webpush from 'web-push';
 

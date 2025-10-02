@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { db } from '@/server/db';
-import { customers } from '@/server/db/schema';
+import { db } from '@/db';
+import { customers } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getCustomerFromSession } from '@/lib/session';
 

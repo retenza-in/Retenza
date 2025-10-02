@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/server/db";
-import { loyaltyPrograms } from "@/server/db/schema";
+import { db } from "@/db";
+import { loyaltyPrograms } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getUserFromSession as getBusinessFromSession } from "@/lib/session";
 

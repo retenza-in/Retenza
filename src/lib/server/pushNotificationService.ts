@@ -1,5 +1,5 @@
-import { db } from '@/server/db';
-import { pushSubscriptions, notifications } from '@/server/db/schema';
+import { db } from '@/db';
+import { pushSubscriptions, notifications } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import type { NotificationData } from '../pushNotifications';
 

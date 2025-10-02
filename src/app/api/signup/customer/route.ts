@@ -1,5 +1,5 @@
-import { db } from "@/server/db";
-import { customers, sessions } from "@/server/db/schema";
+import { db } from "@/db";
+import { customers, sessions } from "@/db/schema";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";

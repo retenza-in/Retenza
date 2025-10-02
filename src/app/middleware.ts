@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { db } from "@/server/db";
-import { sessions } from "@/server/db/schema";
+import { db } from "@/db";
+import { sessions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 const PROTECTED_ROUTES = {

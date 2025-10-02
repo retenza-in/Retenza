@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { db } from "@/server/db";
-import { missions } from "@/server/db/schema";
+import { db } from "@/db";
+import { missions } from "@/db/schema";
 import { getUserFromSession } from "@/lib/session";
 import { eq, desc, and } from "drizzle-orm";
 

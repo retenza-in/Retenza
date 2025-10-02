@@ -1,5 +1,5 @@
-import { db } from "@/server/db";
-import { businesses, sessions } from "@/server/db/schema";
+import { db } from "@/db";
+import { businesses, sessions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";

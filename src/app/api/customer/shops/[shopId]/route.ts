@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { db } from "@/server/db";
+import { db } from "@/db";
 import {
   businesses,
   customerLoyalty,
   transactions,
   loyaltyPrograms,
-} from "@/server/db/schema";
+} from "@/db/schema";
 import { getCustomerFromSession } from "@/lib/session";
 import { eq, and } from "drizzle-orm";
 

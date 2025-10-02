@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { db, customers, customerLoyalty, transactions, missions, businesses } from "@/server/db";
+import { db, customers, customerLoyalty, transactions, missions, businesses } from "@/db";
 import { getUserFromSession } from "@/lib/session";
 import { eq, sql, and, desc, gte, count, sum } from "drizzle-orm";
 

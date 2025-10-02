@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
-import { db } from "../server/db";
-import { sessions, businesses, customers } from "../server/db/schema";
+import { db } from "../db";
+import { sessions, businesses, customers } from "../db/schema";
 import { eq, and } from "drizzle-orm";
 
 const SESSION_COOKIE_NAME = "session_id";

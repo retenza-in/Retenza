@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/server/db';
-import { missionRegistry, missions, customers } from '@/server/db/schema';
+import { db } from '@/db';
+import { missionRegistry, missions, customers } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { getUserFromSession } from '@/lib/session';
-import { notifications } from '@/server/db/schema';
+import { notifications } from '@/db/schema';
 
 // Get all mission registries for a business
 export async function GET(req: NextRequest) {

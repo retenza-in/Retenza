@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { db, customers, customerLoyalty, transactions, loyaltyPrograms } from "@/server/db";
-import type { Tier } from "@/server/db/schema";
+import { db, customers, customerLoyalty, transactions, loyaltyPrograms } from "@/db";
+import type { Tier } from "@/db/schema";
 import { getUserFromSession } from "@/lib/session";
 import { eq, sql, and, desc } from "drizzle-orm";
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromSession } from '@/lib/session';
-import { db } from '@/server/db';
-import { customerLoyalty, transactions, notifications, rewardRedemptions, pushSubscriptions, loyaltyPrograms } from '@/server/db/schema';
+import { db } from '@/db';
+import { customerLoyalty, transactions, notifications, rewardRedemptions, pushSubscriptions, loyaltyPrograms } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { BusinessNotificationService } from '@/lib/businessNotificationService';
 
