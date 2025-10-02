@@ -44,31 +44,31 @@ interface ShopData {
   shop: {
     id: number;
     name: string;
-    business_type: string;
+    businessType: string;
     address: string;
-    gmap_link?: string;
-    logo_url?: string;
+    gmapLink?: string;
+    logoUrl?: string;
   };
   loyaltyProgram: {
     id: number;
-    business_id: number;
-    points_rate: number;
+    businessId: number;
+    pointsRate: number;
     description: string;
     tiers: Tier[];
   } | null;
   loyalty: {
-    customer_id: number;
-    business_id: number;
+    customerId: number;
+    businessId: number;
     points: number;
-    current_tier_name: string;
+    currentTierName: string;
   } | null;
   transactions: {
     id: number;
-    customer_id: number;
-    business_id: number;
-    bill_amount: string;
-    points_awarded: number;
-    created_at: string;
+    customerId: number;
+    businessId: number;
+    billAmount: string;
+    pointsAwarded: number;
+    createdAt: string;
   }[];
 }
 
@@ -140,7 +140,7 @@ export default function ShopDetailsPage() {
     ? Math.floor((currentPoints / nextTier.points_to_unlock) * 100)
     : 100;
 
-  const currentTier = loyaltyProgram?.tiers.find(tier => tier.name === loyalty?.current_tier_name);
+  const currentTier = loyaltyProgram?.tiers.find(tier => tier.name === loyalty?.currentTierName);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -150,10 +150,10 @@ export default function ShopDetailsPage() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
-                {shop.logo_url ? (
+                {shop.logoUrl ? (
                   <div className="w-12 h-12 rounded-xl overflow-hidden border border-gray-200">
                     <img
-                      src={shop.logo_url}
+                      src={shop.logoUrl}
                       alt={`${shop.name} logo`}
                       className="w-full h-full object-cover"
                     />
@@ -167,7 +167,7 @@ export default function ShopDetailsPage() {
                   <h1 className="text-3xl font-bold text-gray-900">{shop.name}</h1>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                      {shop.business_type}
+                      {shop.businessType}
                     </Badge>
                     <div className="flex items-center gap-1 text-yellow-500">
                       <Star className="w-4 h-4 fill-current" />
@@ -184,13 +184,13 @@ export default function ShopDetailsPage() {
                 <span>{shop.address}</span>
               </div>
 
-              {/* Location Button - Only show if gmap_link exists */}
-              {shop.gmap_link && (
+              {/* Location Button - Only show if gmapLink exists */}
+              {shop.gmapLink && (
                 <div className="mt-3">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(shop.gmap_link, '_blank')}
+                    onClick={() => window.open(shop.gmapLink, '_blank')}
                     className="border-green-200 text-green-700 hover:bg-green-50"
                   >
                     <MapPin className="w-4 h-4 mr-2" />
@@ -227,7 +227,7 @@ export default function ShopDetailsPage() {
                     {currentPoints.toLocaleString()}
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
-                    Earn {loyaltyProgram?.points_rate ?? 1} point per ₹1 spent
+                    Earn {loyaltyProgram?.pointsRate ?? 1} point per ₹1 spent
                   </p>
                 </div>
 
@@ -235,7 +235,7 @@ export default function ShopDetailsPage() {
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-lg font-medium text-gray-700">Current Tier</span>
                     <Badge className="bg-amber-100 text-amber-800 border-amber-200 px-3 py-1">
-                      {loyalty?.current_tier_name ?? 'Bronze'}
+                      {loyalty?.currentTierName ?? 'Bronze'}
                     </Badge>
                   </div>
                   {currentTier && (
@@ -307,10 +307,10 @@ export default function ShopDetailsPage() {
                           </div>
                           <div>
                             <p className="font-medium text-gray-900">
-                              ₹{Number(tx.bill_amount).toFixed(2)}
+                              ₹{Number(tx.billAmount).toFixed(2)}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {new Date(tx.created_at).toLocaleDateString('en-IN', {
+                              {new Date(tx.createdAt).toLocaleDateString('en-IN', {
                                 day: 'numeric',
                                 month: 'short',
                                 year: 'numeric'
@@ -320,7 +320,7 @@ export default function ShopDetailsPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-semibold text-blue-600">
-                            +{tx.points_awarded} pts
+                            +{tx.pointsAwarded} pts
                           </p>
                           <p className="text-xs text-gray-500">earned</p>
                         </div>
@@ -349,7 +349,7 @@ export default function ShopDetailsPage() {
                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100">
                       <p className="text-sm text-gray-600 mb-1">Points Rate</p>
                       <p className="text-2xl font-bold text-purple-600">
-                        1 ₹ = {loyaltyProgram.points_rate} point
+                        1 ₹ = {loyaltyProgram.pointsRate} point
                       </p>
                     </div>
 

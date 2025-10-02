@@ -26,18 +26,18 @@ export async function GET(
       .select({
         id: businesses.id,
         name: businesses.name,
-        business_type: businesses.business_type,
+        businessType: businesses.businessType,
         address: businesses.address,
-        gmap_link: businesses.gmap_link,
-        logo_url: businesses.logo_url,
+        gmapLink: businesses.gmapLink,
+        logoUrl: businesses.logoUrl,
         region: businesses.region,
         loyaltyProgramId: loyaltyPrograms.id,
-        pointsRate: loyaltyPrograms.points_rate,
+        pointsRate: loyaltyPrograms.pointsRate,
         description: loyaltyPrograms.description,
         tiers: loyaltyPrograms.tiers,
       })
       .from(businesses)
-      .leftJoin(loyaltyPrograms, eq(loyaltyPrograms.business_id, businesses.id))
+      .leftJoin(loyaltyPrograms, eq(loyaltyPrograms.businessId, businesses.id))
       .where(eq(businesses.id, shopId));
 
     if (!shopData) {
@@ -49,8 +49,8 @@ export async function GET(
       .from(customerLoyalty)
       .where(
         and(
-          eq(customerLoyalty.customer_id, sessionUser.id),
-          eq(customerLoyalty.business_id, shopId),
+          eq(customerLoyalty.customerId, sessionUser.id),
+          eq(customerLoyalty.businessId, shopId),
         ),
       );
 
@@ -59,8 +59,8 @@ export async function GET(
       .from(transactions)
       .where(
         and(
-          eq(transactions.customer_id, sessionUser.id),
-          eq(transactions.business_id, shopId),
+          eq(transactions.customerId, sessionUser.id),
+          eq(transactions.businessId, shopId),
         ),
       );
 
@@ -69,17 +69,17 @@ export async function GET(
       shop: {
         id: shopData.id,
         name: shopData.name,
-        business_type: shopData.business_type,
+        businessType: shopData.businessType,
         address: shopData.address,
-        gmap_link: shopData.gmap_link,
-        logo_url: shopData.logo_url,
+        gmapLink: shopData.gmapLink,
+        logoUrl: shopData.logoUrl,
         region: shopData.region,
       },
       loyaltyProgram: shopData.loyaltyProgramId
         ? {
             id: shopData.loyaltyProgramId,
-            business_id: shopId,
-            points_rate: shopData.pointsRate,
+            businessId: shopId,
+            pointsRate: shopData.pointsRate,
             description: shopData.description,
             tiers: shopData.tiers ?? [],
           }

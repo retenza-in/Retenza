@@ -28,13 +28,13 @@ export function BusinessInfoForm({
         resolver: zodResolver(schema as any),
         defaultValues: {
             name: '',
-            phone_number: '',
+            phoneNumber: '',
             address: '',
-            business_type: '',
+            businessType: '',
             email: '',
             description: '',
-            gmap_link: '',
-            logo_url: '',
+            gmapLink: '',
+            logoUrl: '',
             password: '',
             confirmPassword: '',
         },
@@ -82,7 +82,7 @@ export function BusinessInfoForm({
                 }
 
                 const uploadResult = await uploadResponse.json();
-                data.logo_url = uploadResult.logo_url;
+                data.logoUrl = uploadResult.logoUrl;
             }
 
             // Now submit the business info with the logo URL
@@ -132,17 +132,17 @@ export function BusinessInfoForm({
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="phone_number" className="text-sm font-medium text-gray-700">
+                                    <Label htmlFor="phoneNumber" className="text-sm font-medium text-gray-700">
                                         Phone Number (Login) <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
-                                        id="phone_number"
-                                        {...register('phone_number')}
+                                        id="phoneNumber"
+                                        {...register('phoneNumber')}
                                         disabled={isLoading}
                                         className="mt-1 focus:border-blue-500 focus:ring-blue-500 border-gray-300"
                                         placeholder="+1234567890"
                                     />
-                                    {errors.phone_number && <p className="text-red-500 text-sm mt-1">{errors.phone_number.message ? String(errors.phone_number.message) : 'Invalid input'}</p>}
+                                    {errors.phoneNumber && <p className="text-red-500 text-sm mt-1">{errors.phoneNumber.message ? String(errors.phoneNumber.message) : 'Invalid input'}</p>}
                                 </div>
                             </div>
 
@@ -162,11 +162,11 @@ export function BusinessInfoForm({
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="business_type" className="text-sm font-medium text-gray-700">
+                                    <Label htmlFor="businessType" className="text-sm font-medium text-gray-700">
                                         Business Type <span className="text-red-500">*</span>
                                     </Label>
                                     <Controller
-                                        name="business_type"
+                                        name="businessType"
                                         control={control}
                                         render={({ field }) => (
                                             <Select
@@ -187,7 +187,7 @@ export function BusinessInfoForm({
                                             </Select>
                                         )}
                                     />
-                                    {errors.business_type && <p className="text-red-500 text-sm mt-1">{errors.business_type.message ? String(errors.business_type.message) : 'Invalid input'}</p>}
+                                    {errors.businessType && <p className="text-red-500 text-sm mt-1">{errors.businessType.message ? String(errors.businessType.message) : 'Invalid input'}</p>}
                                 </div>
                             </div>
 
@@ -261,19 +261,19 @@ export function BusinessInfoForm({
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="gmap_link" className="text-sm font-medium text-gray-700">
+                                    <Label htmlFor="gmapLink" className="text-sm font-medium text-gray-700">
                                         Google Maps Link
                                     </Label>
                                     <Input
-                                        id="gmap_link"
+                                        id="gmapLink"
                                         type="url"
-                                        {...register('gmap_link')}
+                                        {...register('gmapLink')}
                                         disabled={isLoading}
                                         placeholder="https://maps.google.com/..."
                                         className="mt-1 focus:border-blue-500 focus:ring-blue-500 border-gray-300"
                                     />
                                     <p className="text-xs text-gray-500 mt-1">Customers can click this to get directions to your business</p>
-                                    {errors.gmap_link && <p className="text-red-500 text-sm mt-1">{errors.gmap_link.message ? String(errors.gmap_link.message) : 'Invalid input'}</p>}
+                                    {errors.gmapLink && <p className="text-red-500 text-sm mt-1">{errors.gmapLink.message ? String(errors.gmapLink.message) : 'Invalid input'}</p>}
                                 </div>
                             </div>
 
@@ -329,7 +329,7 @@ export function BusinessInfoForm({
                                         </div>
                                     )}
                                 </div>
-                                {errors.logo_url && <p className="text-red-500 text-sm mt-1">{errors.logo_url.message ? String(errors.logo_url.message) : 'Invalid input'}</p>}
+                                {errors.logoUrl && <p className="text-red-500 text-sm mt-1">{errors.logoUrl.message ? String(errors.logoUrl.message) : 'Invalid input'}</p>}
                             </div>
                         </div>
 

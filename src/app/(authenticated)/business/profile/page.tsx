@@ -26,15 +26,15 @@ import {
 interface BusinessProfile {
     id: number;
     name: string;
-    business_type: string;
+    businessType: string;
     description: string;
     address: string;
-    contact_number: string;
-    contact_number_2?: string;
-    gmap_link?: string;
-    logo_url?: string;
+    contactNumber: string;
+    contactNumber2?: string;
+    gmapLink?: string;
+    logoUrl?: string;
     region?: string;
-    additional_info?: Record<string, {
+    additionalInfo?: Record<string, {
         label: string;
         type: string;
         value: string;
@@ -83,7 +83,7 @@ export default function BusinessProfilePage() {
         { key: 'region', label: 'Region', type: 'text', placeholder: 'Geographical region of your business', required: false, category: 'contact' },
 
         // Business Details
-        { key: 'logo_url', label: 'Company Logo', type: 'url', placeholder: 'GCP bucket URL for your company logo', required: false, category: 'details' },
+        { key: 'logoUrl', label: 'Company Logo', type: 'url', placeholder: 'GCP bucket URL for your company logo', required: false, category: 'details' },
     ];
 
     useEffect(() => {
@@ -171,8 +171,8 @@ export default function BusinessProfilePage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    additional_info: {
-                        ...profile?.additional_info,
+                    additionalInfo: {
+                        ...profile?.additionalInfo,
                         [newField.key]: {
                             label: newField.label,
                             type: newField.type,
@@ -201,11 +201,11 @@ export default function BusinessProfilePage() {
     };
 
     const removeCustomField = async (key: string) => {
-        if (!profile?.additional_info) return;
+        if (!profile?.additionalInfo) return;
 
         setSaving(true);
         try {
-            const updatedAdditionalInfo = { ...profile.additional_info };
+            const updatedAdditionalInfo = { ...profile.additionalInfo };
             delete updatedAdditionalInfo[key];
 
             const response = await fetch('/api/business/profile', {
@@ -214,7 +214,7 @@ export default function BusinessProfilePage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    additional_info: updatedAdditionalInfo,
+                    additionalInfo: updatedAdditionalInfo,
                 }),
             });
 
@@ -260,7 +260,7 @@ export default function BusinessProfilePage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    logo_url: result.logo_url,
+                    logoUrl: result.logoUrl,
                 }),
             });
 
@@ -313,8 +313,8 @@ export default function BusinessProfilePage() {
             );
         }
 
-        // Special handling for logo_url to display as image
-        if (field.key === 'logo_url' && currentValue && !isEditing) {
+        // Special handling for logoUrl to display as image
+        if (field.key === 'logoUrl' && currentValue && !isEditing) {
             return (
                 <div className="flex items-center justify-between group">
                     <div className="flex-1">
@@ -412,9 +412,9 @@ export default function BusinessProfilePage() {
     };
 
     const renderCustomFields = () => {
-        if (!profile?.additional_info) return null;
+        if (!profile?.additionalInfo) return null;
 
-        return Object.entries(profile.additional_info).map(([key, fieldData]) => (
+        return Object.entries(profile.additionalInfo).map(([key, fieldData]) => (
             <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex-1">
                     <p className="text-sm text-gray-600">{fieldData.label}</p>
@@ -571,10 +571,10 @@ export default function BusinessProfilePage() {
                                             onChange={handleLogoUpload}
                                         />
 
-                                        {profile?.logo_url && (
+                                        {profile?.logoUrl && (
                                             <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                                                 <img
-                                                    src={profile.logo_url}
+                                                    src={profile.logoUrl}
                                                     alt="Company Logo"
                                                     className="w-16 h-16 object-cover rounded-lg border border-gray-200"
                                                     onError={(e) => {

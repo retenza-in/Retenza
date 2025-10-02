@@ -8,8 +8,6 @@ import { z } from 'zod';
 import { adminAuth } from "@/lib/firebase/admin";
 import { createSession } from "@/lib/session";
 
-const SESSION_COOKIE_NAME = "session_id";
-
 const customerSignupSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters.'),
   confirmPassword: z.string().min(8, 'Please confirm your password.'),
@@ -37,7 +35,7 @@ export async function POST(req: Request) {
     }
 
     const existing = await db.query.customers.findFirst({
-      where: (customers, { eq }) => eq(customers.phone_number, phoneNumber), 
+      where: (customers, { eq }) => eq(customers.phoneNumber, phoneNumber), 
     });
 
     if (existing) {
@@ -49,9 +47,9 @@ export async function POST(req: Request) {
     const [insertedCustomer] = await db
       .insert(customers)
       .values({
-        phone_number: phoneNumber,
-        hashed_password: hashedPassword,
-        is_setup_complete: false,
+        phoneNumber: phoneNumber,
+        hashedPassword: hashedPassword,
+        isSetupComplete: false,
       })
       .returning({ id: customers.id });
 

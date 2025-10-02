@@ -22,17 +22,17 @@ export default function BusinessMissionsPage() {
     title: string;
     description: string;
     offer: string;
-    applicable_tiers: string[];
-    expires_at: string;
+    applicableTiers: string[];
+    expiresAt: string;
     filters: {
       gender?: ('Male' | 'Female' | 'Other')[];
       age_range?: { min: number; max: number };
       location?: string[];
       customer_type?: string[];
     };
-    is_active: boolean;
-    created_at: string;
-    updated_at: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
   }>>([]);
   const [availableTiers, setAvailableTiers] = useState<string[]>([]);
   const [loadingMissions, setLoadingMissions] = useState(false);
@@ -46,12 +46,7 @@ export default function BusinessMissionsPage() {
   const [selectedTiers, setSelectedTiers] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [newExpiry, setNewExpiry] = useState('');
-  const [newFilters, setNewFilters] = useState<{
-    gender?: ('Male' | 'Female' | 'Other')[];
-    age_range?: { min: number; max: number };
-    location?: string[];
-    customer_type?: string[];
-  }>({});
+  const [newFilters, setNewFilters] = useState<typeof missions[number]['filters']>({});
   const [newIsActive, setNewIsActive] = useState(true);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
@@ -101,23 +96,7 @@ export default function BusinessMissionsPage() {
     try {
       setLoadingMissions(true);
       const res = await fetch('/api/business/missions');
-      const data = await res.json() as Array<{
-        id: number;
-        title: string;
-        description: string;
-        offer: string;
-        applicable_tiers: string[];
-        expires_at: string;
-        filters: {
-          gender?: ('Male' | 'Female' | 'Other')[];
-          age_range?: { min: number; max: number };
-          location?: string[];
-          customer_type?: string[];
-        };
-        is_active: boolean;
-        created_at: string;
-        updated_at: string;
-      }>;
+      const data = await res.json() as typeof missions;
       setMissions(Array.isArray(data) ? data : []);
     } catch (err) {
       toast.error('Failed to load missions. Please try again.');
@@ -151,10 +130,10 @@ export default function BusinessMissionsPage() {
       title: newTitle,
       description: newDescription,
       offer: newOffer,
-      applicable_tiers: selectAll ? ['all', ...availableTiers] : selectedTiers,
-      expires_at: newExpiry,
+      applicableTiers: selectAll ? ['all', ...availableTiers] : selectedTiers,
+      expiresAt: newExpiry,
       filters: newFilters,
-      is_active: newIsActive,
+      isActive: newIsActive,
     };
 
     try {
@@ -189,10 +168,10 @@ export default function BusinessMissionsPage() {
       title: newTitle,
       description: newDescription,
       offer: newOffer,
-      applicable_tiers: selectAll ? ['all', ...availableTiers] : selectedTiers,
-      expires_at: newExpiry,
+      applicableTiers: selectAll ? ['all', ...availableTiers] : selectedTiers,
+      expiresAt: newExpiry,
       filters: newFilters,
-      is_active: newIsActive,
+      isActive: newIsActive,
     };
 
     try {
@@ -216,33 +195,19 @@ export default function BusinessMissionsPage() {
     }
   }
 
-  function startEditMission(mission: {
-    id: number;
-    title: string;
-    description: string;
-    offer: string;
-    applicable_tiers: string[];
-    expires_at: string;
-    filters: {
-      gender?: string[];
-      age_range?: { min: number; max: number };
-      location?: string[];
-      customer_type?: string[];
-    };
-    is_active: boolean;
-  }) {
+  function startEditMission(mission: typeof missions[number]) {
     setEditingMission(mission.id);
     setNewTitle(mission.title);
     setNewDescription(mission.description);
     setNewOffer(mission.offer);
-    setSelectedTiers(mission.applicable_tiers.filter((t: string) => t !== 'all'));
-    setSelectAll(mission.applicable_tiers.includes('all'));
-    setNewExpiry(new Date(mission.expires_at).toISOString().split('T')[0]);
+    setSelectedTiers(mission.applicableTiers.filter((t: string) => t !== 'all'));
+    setSelectAll(mission.applicableTiers.includes('all'));
+    setNewExpiry(new Date(mission.expiresAt).toISOString().split('T')[0]);
     setNewFilters({
       ...(mission.filters ?? {}),
       gender: mission.filters?.gender as ('Male' | 'Female' | 'Other')[] | undefined
     });
-    setNewIsActive(mission.is_active);
+    setNewIsActive(mission.isActive);
 
     // Set active filters based on existing mission filters
     const filters = [];
@@ -580,11 +545,11 @@ export default function BusinessMissionsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {missions.length ? missions.map(mission => (
-            <Card key={mission.id} className={`min-h-[200px] rounded-xl hover:shadow-lg transition-shadow duration-200 ${!mission.is_active ? 'opacity-60' : ''}`}>
+            <Card key={mission.id} className={`min-h-[200px] rounded-xl hover:shadow-lg transition-shadow duration-200 ${!mission.isActive ? 'opacity-60' : ''}`}>
               <CardHeader className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <CardTitle>{mission.title}</CardTitle>
-                  {!mission.is_active && (
+                  {!mission.isActive && (
                     <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded">Inactive</span>
                   )}
                 </div>
@@ -602,9 +567,9 @@ export default function BusinessMissionsPage() {
                   </span>
                 </div>
 
-                {mission.applicable_tiers.length > 0 && (
+                {mission.applicableTiers.length > 0 && (
                   <p className="text-sm text-gray-500 mb-2">
-                    <strong>Tiers:</strong> {mission.applicable_tiers
+                    <strong>Tiers:</strong> {mission.applicableTiers
                       .map((t: unknown) => (typeof t === "object" && t !== null ? (t as { name: string }).name : String(t)))
                       .join(', ')}
                   </p>
@@ -626,11 +591,11 @@ export default function BusinessMissionsPage() {
                 )}
 
                 <div className="text-sm text-gray-500 space-y-1">
-                  <p><strong>Status:</strong> {mission.is_active ? 'Active' : 'Inactive'}</p>
-                  <p><strong>Expires:</strong> {new Date(mission.expires_at).toLocaleDateString()}</p>
-                  <p><strong>Created:</strong> {new Date(mission.created_at).toLocaleDateString()}</p>
-                  {mission.updated_at !== mission.created_at && (
-                    <p><strong>Updated:</strong> {new Date(mission.updated_at).toLocaleDateString()}</p>
+                  <p><strong>Status:</strong> {mission.isActive ? 'Active' : 'Inactive'}</p>
+                  <p><strong>Expires:</strong> {new Date(mission.expiresAt).toLocaleDateString()}</p>
+                  <p><strong>Created:</strong> {new Date(mission.createdAt).toLocaleDateString()}</p>
+                  {mission.updatedAt !== mission.createdAt && (
+                    <p><strong>Updated:</strong> {new Date(mission.updatedAt).toLocaleDateString()}</p>
                   )}
                 </div>
               </CardContent>

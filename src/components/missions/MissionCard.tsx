@@ -9,42 +9,42 @@ import { Badge } from '../ui/badge';
 
 interface Mission {
   id: number;
-  business_id: number;
+  businessId: number;
   title: string;
   description: string;
   offer: string;
-  applicable_tiers: string[];
-  expires_at: string;
+  applicableTiers: string[];
+  expiresAt: string;
   filters: {
     gender?: ('Male' | 'Female' | 'Other')[];
     age_range?: { min: number; max: number };
     location?: string[];
     customer_type?: string[];
   };
-  business_name: string;
-  business_address: string;
+  businessName: string;
+  businessAddress: string;
 }
 
 interface MissionRegistry {
   id: number;
-  mission_id: number;
+  missionId: number;
   status: 'in_progress' | 'completed' | 'failed';
-  started_at: string;
-  completed_at?: string;
-  discount_amount: string;
-  discount_percentage: string;
+  startedAt: string;
+  completedAt?: string;
+  discountAmount: string;
+  discountPercentage: string;
   notes?: string;
-  mission_title: string;
-  mission_description: string;
-  mission_offer: string;
-  business_name: string;
+  missionTitle: string;
+  missionDescription: string;
+  missionOffer: string;
+  businessName: string;
 }
 
 interface CompanyMissions {
-  business_id: number;
-  business_name: string;
-  business_address: string;
-  business_region: string;
+  businessId: number;
+  businessName: string;
+  businessAddress: string;
+  businessRegion: string;
   missions: Mission[];
 }
 
@@ -98,8 +98,8 @@ export default function MissionCard({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          business_id: mission.business_id,
-          mission_id: mission.id,
+          businessId: mission.businessId,
+          missionId: mission.id,
         }),
       });
 
@@ -124,8 +124,8 @@ export default function MissionCard({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          mission_id: mission.id,
-          business_id: mission.business_id,
+          missionId: mission.id,
+          businessId: mission.businessId,
         }),
       });
 
@@ -149,7 +149,7 @@ export default function MissionCard({
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-blue-600" />
-            <span className="text-sm font-medium text-blue-600">{mission.business_name}</span>
+            <span className="text-sm font-medium text-blue-600">{mission.businessName}</span>
           </div>
           {isProgress && mission.progress && (
             <Badge className={getStatusColor(mission.progress.status)}>
@@ -204,7 +204,7 @@ export default function MissionCard({
 
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <Calendar className="w-4 h-4" />
-          <span>Expires: {new Date(mission.expires_at).toLocaleDateString()}</span>
+          <span>Expires: {new Date(mission.expiresAt).toLocaleDateString()}</span>
         </div>
 
         {!isProgress && !mission.progress ? (

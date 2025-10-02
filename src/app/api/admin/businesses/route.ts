@@ -9,16 +9,16 @@ export async function GET() {
             .select({
                 id: businesses.id,
                 name: businesses.name,
-                phone_number: businesses.phone_number,
-                business_type: businesses.business_type,
+                phone_number: businesses.phoneNumber,
+                business_type: businesses.businessType,
                 address: businesses.address,
                 description: businesses.description,
                 approved: businesses.approved,
-                created_at: businesses.created_at,
-                is_setup_complete: businesses.is_setup_complete,
+                created_at: businesses.createdAt,
+                is_setup_complete: businesses.isSetupComplete,
             })
             .from(businesses)
-            .orderBy(businesses.created_at);
+            .orderBy(businesses.createdAt);
 
         return NextResponse.json({
             success: true,

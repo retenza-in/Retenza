@@ -61,7 +61,7 @@ export const customers = pgTable("customers", {
 export type Tier = {
   id: number;
   name: string;
-  pointsToUnlock: number;
+  points_to_unlock: number;
   rewards: {
     id: number; // Unique ID for each reward
     reward_type: 'cashback' | 'limited_usage' | 'custom';

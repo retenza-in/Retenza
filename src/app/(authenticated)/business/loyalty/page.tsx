@@ -15,7 +15,7 @@ import { NewTierForm } from '@/components/NewTierForm';
 
 type LoyaltyProgram = {
   id: number;
-  points_rate: number;
+  pointsRate: number;
   tiers: Tier[];
 };
 
@@ -47,15 +47,15 @@ export default function LoyaltyPage() {
   async function handleSaveTier(newTier: Tier) {
     try {
       setSaving(true);
-      const payload: { tier: Tier; points_rate?: number } = { tier: newTier };
+      const payload: { tier: Tier; pointsRate?: number } = { tier: newTier };
 
       if (!program) {
-        const points_rate = parseFloat(prompt('Enter points rate for new program (default: 1)') ?? '1');
-        if (isNaN(points_rate) || points_rate <= 0) {
+        const pointsRate = parseFloat(prompt('Enter points rate for new program (default: 1)') ?? '1');
+        if (isNaN(pointsRate) || pointsRate <= 0) {
           toast.error('Invalid points rate. Using default value 1.');
-          payload.points_rate = 1;
+          payload.pointsRate = 1;
         } else {
-          payload.points_rate = points_rate;
+          payload.pointsRate = pointsRate;
         }
       }
 
@@ -236,7 +236,7 @@ export default function LoyaltyPage() {
                     </div>
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Points Rate</p>
-                      <p className="text-2xl font-bold text-gray-900">{program.points_rate}:1</p>
+                      <p className="text-2xl font-bold text-gray-900">{program.pointsRate}:1</p>
                     </div>
                   </div>
                 </CardContent>

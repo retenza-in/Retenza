@@ -18,12 +18,13 @@ import { motion } from 'framer-motion';
 import { Star, Building2, CheckCircle, Users, Gift, Target } from 'lucide-react';
 
 const phoneNumberSchema = z.string().regex(/^(\+?\d{1,3})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/, "Invalid phone number format.");
+
 const businessInfoSchema = z.object({
   name: z.string().min(2, 'Business name is required.'),
-  phone_number: phoneNumberSchema,
-  contact_number_2: phoneNumberSchema.optional().or(z.literal('')),
+  phoneNumber: phoneNumberSchema,
+  contactNumber2: phoneNumberSchema.optional().or(z.literal('')),
   address: z.string().min(5, 'Address is required.'),
-  business_type: z.string().min(1, 'Business type is required.'),
+  businessType: z.string().min(1, 'Business type is required.'),
   email: z.string().email('Please enter a valid email address.').optional().or(z.literal('')),
   password: z.string().min(8, 'Password must be at least 8 characters.'),
   confirmPassword: z.string().min(8, 'Please confirm your password.'),
@@ -95,7 +96,7 @@ export default function BusinessSignupPage() {
         return;
       }
 
-      const parsedPhoneNumber = parsePhoneNumberFromString(data.phone_number, 'IN');
+      const parsedPhoneNumber = parsePhoneNumberFromString(data.phoneNumber, 'IN');
       if (!parsedPhoneNumber?.isValid()) {
         const errorMessage = 'Invalid phone number. Please enter a valid Indian number.';
         setError(errorMessage);

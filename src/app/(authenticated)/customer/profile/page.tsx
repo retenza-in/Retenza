@@ -13,7 +13,7 @@ export default async function CustomerProfilePage() {
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-white">
       <CustomerProfileForm user={{
         ...user,
-        is_setup_complete: user.is_setup_complete ?? false
+        isSetupComplete: user.isSetupComplete ?? false
       }} />
     </div>
   );

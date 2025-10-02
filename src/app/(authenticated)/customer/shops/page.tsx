@@ -21,12 +21,12 @@ import {
 interface Shop {
   id: number;
   name: string;
-  business_type: string;
+  businessType: string;
   address: string;
-  gmap_link?: string;
+  gmapLink?: string;
   loyaltyPoints?: number;
   currentTier?: string;
-  logo_url?: string;
+  logoUrl?: string;
 }
 
 interface DashboardShop {
@@ -57,7 +57,7 @@ export default function ShopsPage() {
 
   // Business type options
   const businessTypes = useMemo(() => {
-    const types = new Set(shops.map(shop => shop.business_type));
+    const types = new Set(shops.map(shop => shop.businessType));
     return ['all', ...Array.from(types)];
   }, [shops]);
 
@@ -90,12 +90,12 @@ export default function ShopsPage() {
             const convertedShops: Shop[] = dashboardData.shops.map(shop => ({
               id: parseInt(shop.shopId),
               name: shop.shopName,
-              business_type: shop.shopType,
+              businessType: shop.shopType,
               address: '', // Dashboard doesn't provide address
-              gmap_link: shop.gmapLink,
+              gmapLink: shop.gmapLink,
               loyaltyPoints: shop.loyaltyPoints,
               currentTier: shop.currentTier,
-              logo_url: shop.logoUrl
+              logoUrl: shop.logoUrl
             }));
             setMyShops(convertedShops);
           }
@@ -116,9 +116,9 @@ export default function ShopsPage() {
   const filteredAndSortedShops = useMemo(() => {
     const filtered = shops.filter(shop => {
       const matchesSearch = shop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        shop.business_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        shop.businessType.toLowerCase().includes(searchQuery.toLowerCase()) ||
         shop.address.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesType = selectedType === 'all' || shop.business_type === selectedType;
+      const matchesType = selectedType === 'all' || shop.businessType === selectedType;
       return matchesSearch && matchesType;
     });
 
@@ -128,7 +128,7 @@ export default function ShopsPage() {
         case 'name':
           return a.name.localeCompare(b.name);
         case 'type':
-          return a.business_type.localeCompare(b.business_type);
+          return a.businessType.localeCompare(b.businessType);
         case 'points':
           return (b.loyaltyPoints ?? 0) - (a.loyaltyPoints ?? 0);
         case 'rating':
@@ -265,7 +265,7 @@ export default function ShopsPage() {
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <Badge variant="outline" className="text-xs border-gray-300 text-gray-600">
-                        {shop.business_type}
+                        {shop.businessType}
                       </Badge>
                       <div className="flex items-center gap-1 text-xs text-gray-600">
                         <MapPin className="w-3 h-3" />
@@ -464,13 +464,13 @@ export default function ShopsPage() {
                               {shop.name}
                             </CardTitle>
                             <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 border-blue-200 mt-1">
-                              {shop.business_type}
+                              {shop.businessType}
                             </Badge>
                           </div>
-                          {shop.logo_url ? (
+                          {shop.logoUrl ? (
                             <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200">
                               <img
-                                src={shop.logo_url}
+                                src={shop.logoUrl}
                                 alt={`${shop.name} logo`}
                                 className="w-full h-full object-cover"
                               />
@@ -520,10 +520,10 @@ export default function ShopsPage() {
                     <Card className="group cursor-pointer border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 bg-white">
                       <div className="p-4">
                         <div className="flex items-center gap-4">
-                          {shop.logo_url ? (
+                          {shop.logoUrl ? (
                             <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 flex-shrink-0">
                               <img
-                                src={shop.logo_url}
+                                src={shop.logoUrl}
                                 alt={`${shop.name} logo`}
                                 className="w-full h-full object-cover"
                               />
@@ -542,7 +542,7 @@ export default function ShopsPage() {
                                 </h3>
                                 <div className="flex items-center gap-2 mt-1">
                                   <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 border-blue-200">
-                                    {shop.business_type}
+                                    {shop.businessType}
                                   </Badge>
                                   {shop.currentTier && (
                                     <Badge variant="outline" className="text-xs border-amber-200 text-amber-700">

@@ -43,7 +43,7 @@ const tierSchema = z.object({
 });
 
 const loyaltyProgramFormSchema = z.object({
-  points_rate: z.number().int().positive('Points rate must be a positive integer.').min(1, 'Points rate must be at least 1.'),
+  pointsRate: z.number().int().positive('Points rate must be a positive integer.').min(1, 'Points rate must be at least 1.'),
   description: z.string().min(10, 'A loyalty program description is required.'),
   tiers: z.array(tierSchema).min(1, 'At least one loyalty tier is required.'),
 });
@@ -70,7 +70,7 @@ export function LoyaltyProgramForm({
   } = useForm<LoyaltyProgramData>({
     resolver: zodResolver(loyaltyProgramFormSchema),
     defaultValues: {
-      points_rate: 1,
+      pointsRate: 1,
       description: '',
       tiers: [
         {

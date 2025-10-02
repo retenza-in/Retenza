@@ -16,8 +16,8 @@ interface Notification {
     title: string;
     body: string;
     type: string;
-    is_read: boolean;
-    sent_at: string;
+    isRead: boolean;
+    sentAt: string;
     data: Record<string, unknown>;
 }
 
@@ -45,7 +45,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                 const data = (await response.json()) as { notifications: Notification[] };
                 const list = data.notifications ?? [];
                 setNotifications(list);
-                setUnreadCount(list.filter((n) => !n.is_read).length);
+                setUnreadCount(list.filter((n) => !n.isRead).length);
             }
         } catch (err) {
             console.error('Error fetching notifications:', err);
@@ -70,7 +70,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
             if (response.ok) {
                 setNotifications(prev =>
                     prev.map(n =>
-                        n.id === notificationId ? { ...n, is_read: true } : n
+                        n.id === notificationId ? { ...n, isRead: true } : n
                     )
                 );
                 setUnreadCount(prev => Math.max(0, prev - 1));
@@ -213,7 +213,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                                         notifications.map((notification) => (
                                             <div
                                                 key={notification.id}
-                                                className={`p-3 rounded-lg border ${notification.is_read
+                                                className={`p-3 rounded-lg border ${notification.isRead
                                                     ? 'bg-muted/50 border-muted'
                                                     : 'bg-background border-border'
                                                     }`}
@@ -231,9 +231,9 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                                                         </p>
                                                         <div className="flex items-center justify-between">
                                                             <span className="text-xs text-muted-foreground">
-                                                                {formatDate(notification.sent_at)}
+                                                                {formatDate(notification.sentAt)}
                                                             </span>
-                                                            {!notification.is_read && (
+                                                            {!notification.isRead && (
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="sm"

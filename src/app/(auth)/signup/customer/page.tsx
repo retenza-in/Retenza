@@ -15,7 +15,7 @@ import { User, Phone, Lock, Shield, CheckCircle } from 'lucide-react';
 
 const phoneNumberSchema = z.string().regex(/^(\+?\d{1,3})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/, "Invalid phone number format.");
 const customerSignupSchema = z.object({
-  phone_number: phoneNumberSchema,
+  phoneNumber: phoneNumberSchema,
   password: z.string().min(8, 'Password must be at least 8 characters.'),
   confirmPassword: z.string().min(8, 'Please confirm your password.'),
   otp: z.string().min(6, 'OTP must be 6 digits.'),
@@ -55,14 +55,14 @@ export default function CustomerSignup() {
   const { register, handleSubmit, formState: { errors }, watch, getValues } = useForm<FormData>({
     resolver: zodResolver(customerSignupSchema),
     defaultValues: {
-      phone_number: '',
+      phoneNumber: '',
       password: '',
       confirmPassword: '',
       otp: '',
     },
   });
 
-  const phoneNumber = watch('phone_number');
+  const phoneNumber = watch('phoneNumber');
 
   const handleSendOtp = async () => {
     setLoading(true);
@@ -235,19 +235,19 @@ export default function CustomerSignup() {
               {!otpSent ? (
                 <>
                   <motion.div variants={fadeUp}>
-                    <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="phone-number" className="block text-sm font-medium text-gray-700 mb-2">
                       <Phone className="w-4 h-4 inline mr-2" />
                       Phone Number
                     </label>
                     <input
-                      id="phone_number"
+                      id="phone-number"
                       type="tel"
-                      {...register('phone_number')}
+                      {...register('phoneNumber')}
                       placeholder="Enter your phone number"
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                     />
-                    {errors.phone_number && (
-                      <p className="mt-2 text-sm text-red-600">{errors.phone_number.message}</p>
+                    {errors.phoneNumber && (
+                      <p className="mt-2 text-sm text-red-600">{errors.phoneNumber.message}</p>
                     )}
                   </motion.div>
 

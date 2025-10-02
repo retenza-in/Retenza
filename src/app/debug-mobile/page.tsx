@@ -24,7 +24,7 @@ interface DebugInfo {
                 auth: boolean;
             };
             createdAt: string;
-            business_id: number;
+            businessId: number;
         }>;
     };
     environment: {
@@ -243,7 +243,7 @@ export default function DebugMobilePage() {
                                         Created: {new Date(sub.createdAt).toLocaleString()}
                                     </p>
                                     <Button
-                                        onClick={() => testSpecificBusiness(sub.business_id)}
+                                        onClick={() => testSpecificBusiness(sub.businessId)}
                                         size="sm"
                                         variant="outline"
                                         className="mt-2"
