@@ -12,7 +12,7 @@ import { RewardManager, type Reward } from './RewardManager';
 export type Tier = {
     id?: number; // Changed from string to number for consistency with database
     name: string;
-    points_to_unlock: number;
+    pointsToUnlock: number;
     rewards: Reward[];
 };
 
@@ -80,7 +80,7 @@ export function TierManager({
                             <Button
                                 size="sm"
                                 onClick={handleSave}
-                                disabled={disabled || !editData.name || editData.points_to_unlock < 0}
+                                disabled={disabled || !editData.name || editData.pointsToUnlock < 0}
                                 className="bg-indigo-600 hover:bg-indigo-700 text-white"
                             >
                                 <Save className="w-4 h-4 mr-2" />
@@ -117,8 +117,8 @@ export function TierManager({
                             <Input
                                 type="number"
                                 min="1"
-                                value={editData.points_to_unlock}
-                                onChange={(e) => setEditData({ ...editData, points_to_unlock: Number(e.target.value) })}
+                                value={editData.pointsToUnlock}
+                                onChange={(e) => setEditData({ ...editData, pointsToUnlock: Number(e.target.value) })}
                                 disabled={disabled}
                                 placeholder="e.g., 500"
                                 className="mt-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -153,11 +153,11 @@ export function TierManager({
                                 {tier.name}
                             </CardTitle>
                             <div className="flex items-center gap-2 mt-1">
-                                <Badge className={getTierColor(tier.points_to_unlock)}>
-                                    {getTierName(tier.points_to_unlock)}
+                                <Badge className={getTierColor(tier.pointsToUnlock)}>
+                                    {getTierName(tier.pointsToUnlock)}
                                 </Badge>
                                 <span className="text-sm text-gray-600">
-                                    {tier.points_to_unlock} points to unlock
+                                    {tier.pointsToUnlock} points to unlock
                                 </span>
                             </div>
                         </div>
@@ -229,8 +229,8 @@ export function TierManager({
                             {tier.rewards.map((reward, index) => (
                                 <div key={reward.id ?? index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                                     <div className="flex items-center gap-3">
-                                        <Badge className={getRewardTypeColor(reward.reward_type)}>
-                                            {reward.reward_type.replace('_', ' ')}
+                                        <Badge className={getRewardTypeColor(reward.rewardType)}>
+                                            {reward.rewardType.replace('_', ' ')}
                                         </Badge>
                                         <span className="font-medium text-gray-900">
                                             {getRewardDisplayText(reward)}
@@ -248,12 +248,12 @@ export function TierManager({
 
 // Helper functions
 function getRewardDisplayText(reward: Reward): string {
-    if (reward.reward_type === 'cashback') {
+    if (reward.rewardType === 'cashback') {
         return `${reward.percentage}% cashback`;
-    } else if (reward.reward_type === 'limited_usage') {
-        const monthlyText = reward.usage_limit_per_month === 1 ? 'Monthly' : reward.usage_limit_per_month === 0.5 ? 'Bi-monthly' : `${reward.usage_limit_per_month} times per month`;
-        return `${reward.reward_text} (${monthlyText}, ${reward.one_time ? 'One-time' : 'Multiple'})`;
-    } else if (reward.reward_type === 'custom') {
+    } else if (reward.rewardType === 'limited_usage') {
+        const monthlyText = reward.usageLimitPerMonth === 1 ? 'Monthly' : reward.usageLimitPerMonth === 0.5 ? 'Bi-monthly' : `${reward.usageLimitPerMonth} times per month`;
+        return `${reward.rewardText} (${monthlyText}, ${reward.oneTime ? 'One-time' : 'Multiple'})`;
+    } else if (reward.rewardType === 'custom') {
         return `${reward.name}: ${reward.reward}`;
     }
     return 'Unknown reward type';

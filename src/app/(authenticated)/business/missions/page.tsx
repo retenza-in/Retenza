@@ -26,9 +26,9 @@ export default function BusinessMissionsPage() {
     expiresAt: string;
     filters: {
       gender?: ('Male' | 'Female' | 'Other')[];
-      age_range?: { min: number; max: number };
+      ageRange?: { min: number; max: number };
       location?: string[];
-      customer_type?: string[];
+      customerType?: string[];
     };
     isActive: boolean;
     createdAt: string;
@@ -212,9 +212,9 @@ export default function BusinessMissionsPage() {
     // Set active filters based on existing mission filters
     const filters = [];
     if (mission.filters?.gender && mission.filters.gender.length > 0) filters.push('gender');
-    if (mission.filters?.age_range) filters.push('age_range');
+    if (mission.filters?.ageRange) filters.push('ageRange');
     if (mission.filters?.location && mission.filters.location.length > 0) filters.push('location');
-    if (mission.filters?.customer_type && mission.filters.customer_type.length > 0) filters.push('customer_type');
+    if (mission.filters?.customerType && mission.filters.customerType.length > 0) filters.push('customerType');
     setActiveFilters(filters);
 
     setShowForm(true);
@@ -276,9 +276,9 @@ export default function BusinessMissionsPage() {
     setNewFilters(prev => {
       const updated = { ...prev };
       if (filterType === 'gender') updated.gender = undefined;
-      if (filterType === 'age_range') updated.age_range = undefined;
+      if (filterType === 'ageRange') updated.ageRange = undefined;
       if (filterType === 'location') updated.location = undefined;
-      if (filterType === 'customer_type') updated.customer_type = undefined;
+      if (filterType === 'customerType') updated.customerType = undefined;
       return updated;
     });
   }
@@ -403,9 +403,9 @@ export default function BusinessMissionsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {!activeFilters.includes('gender') && <SelectItem value="gender">Gender</SelectItem>}
-                        {!activeFilters.includes('age_range') && <SelectItem value="age_range">Age Range</SelectItem>}
+                        {!activeFilters.includes('ageRange') && <SelectItem value="ageRange">Age Range</SelectItem>}
                         {!activeFilters.includes('location') && <SelectItem value="location">Location</SelectItem>}
-                        {!activeFilters.includes('customer_type') && <SelectItem value="customer_type">Customer Type</SelectItem>}
+                        {!activeFilters.includes('customerType') && <SelectItem value="customerType">Customer Type</SelectItem>}
                       </SelectContent>
                     </Select>
                   </div>
@@ -449,11 +449,11 @@ export default function BusinessMissionsPage() {
                       </div>
                     )}
 
-                    {activeFilters.includes('age_range') && (
+                    {activeFilters.includes('ageRange') && (
                       <div className="bg-gray-50 p-3 rounded">
                         <div className="flex justify-between items-center mb-2">
                           <label className="text-sm font-medium text-gray-700">Age Range Filter:</label>
-                          <Button variant="ghost" size="sm" onClick={() => removeFilter('age_range')}>
+                          <Button variant="ghost" size="sm" onClick={() => removeFilter('ageRange')}>
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
@@ -461,23 +461,23 @@ export default function BusinessMissionsPage() {
                           <Input
                             type="number"
                             placeholder="Min age"
-                            value={newFilters.age_range?.min ?? ''}
+                            value={newFilters.ageRange?.min ?? ''}
                             onChange={e => setNewFilters(prev => ({
                               ...prev,
-                              age_range: {
+                              ageRange: {
                                 min: parseInt(e.target.value) || 0,
-                                max: prev.age_range?.max ?? 100
+                                max: prev.ageRange?.max ?? 100
                               }
                             }))}
                           />
                           <Input
                             type="number"
                             placeholder="Max age"
-                            value={newFilters.age_range?.max ?? ''}
+                            value={newFilters.ageRange?.max ?? ''}
                             onChange={e => setNewFilters(prev => ({
                               ...prev,
-                              age_range: {
-                                min: prev.age_range?.min ?? 0,
+                              ageRange: {
+                                min: prev.ageRange?.min ?? 0,
                                 max: parseInt(e.target.value) || 100
                               }
                             }))}
@@ -502,18 +502,18 @@ export default function BusinessMissionsPage() {
                       </div>
                     )}
 
-                    {activeFilters.includes('customer_type') && (
+                    {activeFilters.includes('customerType') && (
                       <div className="bg-gray-50 p-3 rounded">
                         <div className="flex justify-between items-center mb-2">
                           <label className="text-sm font-medium text-gray-700">Customer Type Filter:</label>
-                          <Button variant="ghost" size="sm" onClick={() => removeFilter('customer_type')}>
+                          <Button variant="ghost" size="sm" onClick={() => removeFilter('customerType')}>
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
                         <Input
                           placeholder="e.g., new, returning, vip"
-                          value={newFilters.customer_type?.join(',') ?? ''}
-                          onChange={e => setNewFilters(prev => ({ ...prev, customer_type: e.target.value.split(',').filter(s => s.trim()) }))}
+                          value={newFilters.customerType?.join(',') ?? ''}
+                          onChange={e => setNewFilters(prev => ({ ...prev, customerType: e.target.value.split(',').filter(s => s.trim()) }))}
                         />
                       </div>
                     )}
@@ -581,8 +581,8 @@ export default function BusinessMissionsPage() {
                     {mission.filters?.gender && mission.filters.gender.length > 0 && (
                       <p className="text-xs text-gray-400">Gender: {mission.filters.gender.join(', ')}</p>
                     )}
-                    {mission.filters?.age_range && (
-                      <p className="text-xs text-gray-400">Age: {mission.filters.age_range.min}-{mission.filters.age_range.max}</p>
+                    {mission.filters?.ageRange && (
+                      <p className="text-xs text-gray-400">Age: {mission.filters.ageRange.min}-{mission.filters.ageRange.max}</p>
                     )}
                     {mission.filters?.location && mission.filters.location.length > 0 && (
                       <p className="text-xs text-gray-400">Location: {mission.filters.location.join(', ')}</p>

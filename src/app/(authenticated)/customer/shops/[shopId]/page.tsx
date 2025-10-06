@@ -23,21 +23,21 @@ interface Reward {
   id: string;
   name: string;
   reward: string;
-  one_time: boolean;
+  oneTime: boolean;
   percentage?: number;
-  reward_text: string;
-  reward_type: 'cashback' | 'limited_usage' | 'custom';
-  usage_limit: number;
-  time_window?: {
-    start_date: string;
-    end_date: string;
+  rewardText: string;
+  rewardType: 'cashback' | 'limited_usage' | 'custom';
+  usageLimit: number;
+  timeWindow?: {
+    startDate: string;
+    endDate: string;
   };
 }
 
 interface Tier {
   name: string;
   rewards: Reward[];
-  points_to_unlock: number;
+  pointsToUnlock: number;
 }
 
 interface ShopData {
@@ -133,11 +133,11 @@ export default function ShopDetailsPage() {
   const currentPoints = loyalty?.points ?? 0;
 
   const nextTier = loyaltyProgram?.tiers
-    .filter(tier => tier.points_to_unlock > currentPoints)
-    .sort((a, b) => a.points_to_unlock - b.points_to_unlock)[0];
+    .filter(tier => tier.pointsToUnlock > currentPoints)
+    .sort((a, b) => a.pointsToUnlock - b.pointsToUnlock)[0];
 
   const progress = nextTier
-    ? Math.floor((currentPoints / nextTier.points_to_unlock) * 100)
+    ? Math.floor((currentPoints / nextTier.pointsToUnlock) * 100)
     : 100;
 
   const currentTier = loyaltyProgram?.tiers.find(tier => tier.name === loyalty?.currentTierName);
@@ -241,18 +241,18 @@ export default function ShopDetailsPage() {
                   {currentTier && (
                     <div className="space-y-2">
                       <p className="text-sm text-gray-600">
-                        Unlocked at {currentTier.points_to_unlock.toLocaleString()} points
+                        Unlocked at {currentTier.pointsToUnlock.toLocaleString()} points
                       </p>
                       {currentTier.rewards && currentTier.rewards.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                           {currentTier.rewards.map((reward, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
                               <Gift className="w-3 h-3 mr-1" />
-                              {reward.reward_type === 'cashback'
+                              {reward.rewardType === 'cashback'
                                 ? `${reward.percentage}% cashback`
-                                : reward.reward_type === 'limited_usage'
-                                  ? reward.reward_text
-                                  : reward.reward_text || 'Special offer'}
+                                : reward.rewardType === 'limited_usage'
+                                  ? reward.rewardText
+                                  : reward.rewardText || 'Special offer'}
                             </Badge>
                           ))}
                         </div>
@@ -270,7 +270,7 @@ export default function ShopDetailsPage() {
                     <Progress value={progress} className="w-full h-3 [&>div]:bg-gradient-to-r [&>div]:from-green-500 [&>div]:to-emerald-500" />
                     <div className="flex justify-between text-sm text-gray-600 mt-2">
                       <span>{currentPoints.toLocaleString()} points</span>
-                      <span>{nextTier.points_to_unlock.toLocaleString()} points</span>
+                      <span>{nextTier.pointsToUnlock.toLocaleString()} points</span>
                     </div>
                   </div>
                 )}
@@ -363,7 +363,7 @@ export default function ShopDetailsPage() {
                               </div>
                               <div className="text-left">
                                 <p className="font-semibold text-gray-900">{tier.name}</p>
-                                <p className="text-sm text-gray-500">{tier.points_to_unlock.toLocaleString()} points</p>
+                                <p className="text-sm text-gray-500">{tier.pointsToUnlock.toLocaleString()} points</p>
                               </div>
                             </div>
                           </AccordionTrigger>
@@ -379,13 +379,13 @@ export default function ShopDetailsPage() {
                                     <div key={rewardIndex} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                                       <span className="text-sm text-gray-700">
-                                        {reward.reward_type === 'cashback'
+                                        {reward.rewardType === 'cashback'
                                           ? `${reward.percentage}% cashback on purchases`
-                                          : reward.reward_type === 'limited_usage'
-                                            ? reward.reward_text
-                                            : reward.reward_type === 'custom'
-                                              ? reward.reward_text
-                                              : reward.reward_text || 'Special offer'}
+                                          : reward.rewardType === 'limited_usage'
+                                            ? reward.rewardText
+                                            : reward.rewardType === 'custom'
+                                              ? reward.rewardText
+                                              : reward.rewardText || 'Special offer'}
                                       </span>
                                     </div>
                                   ))}

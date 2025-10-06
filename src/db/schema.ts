@@ -61,16 +61,16 @@ export const customers = pgTable("customers", {
 export type Tier = {
   id: number;
   name: string;
-  points_to_unlock: number;
+  pointsToUnlock: number;
   rewards: {
     id: number; // Unique ID for each reward
-    reward_type: 'cashback' | 'limited_usage' | 'custom';
+    rewardType: 'cashback' | 'limited_usage' | 'custom';
     // Cashback reward fields
     percentage?: number;
     // Limited usage reward fields
-    reward_text?: string;
-    usage_limit_per_month?: number; // How many times per month (e.g., 2 = twice per month, 0.5 = bi-monthly)
-    one_time?: boolean;
+    rewardText?: string;
+    usageLimitPerMonth?: number; // How many times per month (e.g., 2 = twice per month, 0.5 = bi-monthly)
+    oneTime?: boolean;
     // Custom reward fields
     name?: string;
     reward?: string;
@@ -109,9 +109,9 @@ export const customerLoyalty = pgTable("customer_loyalty", {
 
 export type MissionAgeFilter = {
   gender?: ('Male' | 'Female' | 'Other')[];
-  age_range?: { min: number; max: number };
+  ageRange?: { min: number; max: number };
   location?: string[];
-  customer_type?: string[];
+  customerType?: string[];
 }
 
 export const missions = pgTable("missions", {
@@ -150,7 +150,7 @@ export const rewardRedemptions = pgTable("reward_redemptions", {
   customerId: integer("customer_id").notNull(),
   businessId: integer("business_id").notNull(),
   rewardId: text("reward_id").notNull(),
-  rewardType: varchar("reward_type", { length: 50 }).notNull(),
+  rewardType: varchar("rewardType", { length: 50 }).notNull(),
   rewardValue: decimal("reward_value", { precision: 10, scale: 2 }).notNull(),
   transactionId: integer("transaction_id").notNull(),
   redeemedAt: timestamp("redeemed_at").defaultNow().notNull(),

@@ -697,8 +697,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "reward_type": {
-          "name": "reward_type",
+        "rewardType": {
+          "name": "rewardType",
           "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true

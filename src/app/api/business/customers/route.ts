@@ -14,7 +14,7 @@ export async function GET(_req: NextRequest) {
     .select({
       c: customers,
       cl: customerLoyalty,
-      last_txn_at: sql`MAX(${transactions.createdAt})`,
+      lastTxnAt: sql`MAX(${transactions.createdAt})`,
     })
     .from(customers)
     .innerJoin(
@@ -44,7 +44,7 @@ export async function GET(_req: NextRequest) {
     updatedAt: row.c.updatedAt,
     points: row.cl.points,
     currentTierName: row.cl.currentTierName,
-    lastTxnAt: row.last_txn_at,
+    lastTxnAt: row.lastTxnAt,
   }));
 
   return NextResponse.json({ customers: formatted });
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
 
   let program = programArr[0];
   if (!program) {
-    const bronzeTier: Tier = { id: 1, name: "Bronze", points_to_unlock: 0, rewards: [] };
+    const bronzeTier: Tier = { id: 1, name: "Bronze", pointsToUnlock: 0, rewards: [] };
     const ins = await db
       .insert(loyaltyPrograms)
       .values({
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
     const bronzeExists = program.tiers.some((t: unknown) => (t as { name: string })?.name?.toLowerCase() === "bronze");
     if (!bronzeExists) {
       const nextId = program.tiers.length ? Math.max(...program.tiers.map((t: unknown) => (t as { id: number })?.id ?? 0)) + 1 : 1;
-      const bronzeTier: Tier = { id: nextId, name: "Bronze", points_to_unlock: 0, rewards: [] };
+      const bronzeTier: Tier = { id: nextId, name: "Bronze", pointsToUnlock: 0, rewards: [] };
       const upd = await db
         .update(loyaltyPrograms)
         .set({ tiers: [...program.tiers, bronzeTier] })

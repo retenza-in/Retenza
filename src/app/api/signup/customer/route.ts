@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const { password, firebaseIdToken } = validatedData;
 
     const decodedToken = await adminAuth.verifyIdToken(firebaseIdToken);
-    const phoneNumber = decodedToken.phone_number; 
+    const phoneNumber = decodedToken.phoneNumber; 
 
     if (!phoneNumber) {
         return NextResponse.json({ error: "Phone number not found in token." }, { status: 400 });

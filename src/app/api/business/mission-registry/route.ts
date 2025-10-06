@@ -117,7 +117,7 @@ export async function PUT(req: NextRequest) {
         };
 
         if (!body.registryId || !body.status) {
-            return NextResponse.json({ error: "Missing registry_id or status" }, { status: 400 });
+            return NextResponse.json({ error: "Missing registryId or status" }, { status: 400 });
         }
 
         const updateData: any = {

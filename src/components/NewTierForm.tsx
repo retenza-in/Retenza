@@ -11,7 +11,7 @@ import { RewardManager, type Reward } from './RewardManager';
 export type Tier = {
     id?: number; // Changed from string to number for consistency with database
     name: string;
-    points_to_unlock: number;
+    pointsToUnlock: number;
     rewards: Reward[];
 };
 
@@ -25,12 +25,12 @@ interface NewTierFormProps {
 export function NewTierForm({ isOpen, onClose, onSave, disabled = false }: NewTierFormProps) {
     const [tierData, setTierData] = useState<Tier>({
         name: '',
-        points_to_unlock: 100,
+        pointsToUnlock: 100,
         rewards: []
     });
 
     const handleSave = () => {
-        if (!tierData.name || tierData.points_to_unlock < 0) return;
+        if (!tierData.name || tierData.pointsToUnlock < 0) return;
         onSave(tierData);
         handleClose();
     };
@@ -38,7 +38,7 @@ export function NewTierForm({ isOpen, onClose, onSave, disabled = false }: NewTi
     const handleClose = () => {
         setTierData({
             name: '',
-            points_to_unlock: 100,
+            pointsToUnlock: 100,
             rewards: []
         });
         onClose();
@@ -99,8 +99,8 @@ export function NewTierForm({ isOpen, onClose, onSave, disabled = false }: NewTi
                                     <Input
                                         type="number"
                                         min="1"
-                                        value={tierData.points_to_unlock}
-                                        onChange={(e) => setTierData({ ...tierData, points_to_unlock: Number(e.target.value) })}
+                                        value={tierData.pointsToUnlock}
+                                        onChange={(e) => setTierData({ ...tierData, pointsToUnlock: Number(e.target.value) })}
                                         disabled={disabled}
                                         placeholder="e.g., 500"
                                         className="mt-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -147,7 +147,7 @@ export function NewTierForm({ isOpen, onClose, onSave, disabled = false }: NewTi
                         </Button>
                         <Button
                             onClick={handleSave}
-                            disabled={disabled || !tierData.name || tierData.points_to_unlock < 0}
+                            disabled={disabled || !tierData.name || tierData.pointsToUnlock < 0}
                             className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
                         >
                             <Save className="w-4 h-4 mr-2" />

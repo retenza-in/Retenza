@@ -56,9 +56,9 @@ export async function POST(req: NextRequest) {
       applicableTiers?: string[];
       filters?: {
         gender?: ('Male' | 'Female' | 'Other')[];
-        age_range?: { min: number; max: number };
+        ageRange?: { min: number; max: number };
         location?: string[];
-        customer_type?: string[];
+        customerType?: string[];
       };
     };
 
@@ -102,9 +102,9 @@ export async function PUT(req: NextRequest) {
       applicableTiers?: string[];
       filters?: {
         gender?: ('Male' | 'Female' | 'Other')[];
-        age_range?: { min: number; max: number };
+        ageRange?: { min: number; max: number };
         location?: string[];
-        customer_type?: string[];
+        customerType?: string[];
       };
       isActive?: boolean;
       expiresAt?: string;
@@ -121,13 +121,13 @@ export async function PUT(req: NextRequest) {
       applicableTiers?: string[];
       filters?: {
         gender?: ('Male' | 'Female' | 'Other')[];
-        age_range?: { min: number; max: number };
+        ageRange?: { min: number; max: number };
         location?: string[];
-        customer_type?: string[];
+        customerType?: string[];
       };
       isActive?: boolean;
       expiresAt?: Date;
-      updated_at?: Date;
+      updatedAt?: Date;
     } = {};
 
     if (body.title !== undefined) updateData.title = body.title;
@@ -137,7 +137,7 @@ export async function PUT(req: NextRequest) {
     if (body.filters !== undefined) updateData.filters = body.filters;
     if (body.isActive !== undefined) updateData.isActive = body.isActive;
     if (body.expiresAt !== undefined) updateData.expiresAt = new Date(body.expiresAt);
-    updateData.updated_at = new Date();
+    updateData.updatedAt = new Date();
 
     const updated = await db
       .update(missions)

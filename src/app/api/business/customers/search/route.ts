@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
         // Find customer's current tier based on points
         let currentTier: Tier | null = null;
         for (let i = tiers.length - 1; i >= 0; i--) {
-            if (loyaltyData.points >= tiers[i].points_to_unlock) {
+            if (loyaltyData.points >= tiers[i].pointsToUnlock) {
                 currentTier = tiers[i];
                 break;
             }
@@ -129,7 +129,7 @@ export async function GET(req: NextRequest) {
         const monthlyRedemptions: Record<string, number> = {};
 
         currentTier.rewards.forEach((reward) => {
-            if (reward.reward_type === 'limited_usage') {
+            if (reward.rewardType === 'limited_usage') {
                 const monthlyCount = redemptionHistory.filter((redemption) => {
                     const redemptionDate = new Date(redemption.redeemedAt);
                     return parseInt(redemption.rewardId) === reward.id &&

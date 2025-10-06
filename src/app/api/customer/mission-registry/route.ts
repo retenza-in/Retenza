@@ -107,8 +107,8 @@ export async function POST(req: NextRequest) {
             body: `You've started "${mission.title}" mission. ${mission.offer}`,
             data: {
                 missionId,
-                mission_title: mission.title,
-                mission_offer: mission.offer,
+                missionTitle: mission.title,
+                missionOffer: mission.offer,
                 startedAt: new Date()
             }
         });

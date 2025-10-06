@@ -71,15 +71,15 @@ export default function BusinessProfilePage() {
     const editableFields: EditableField[] = [
         // Basic Information
         { key: 'name', label: 'Business Name', type: 'text', placeholder: 'Enter business name', required: false, category: 'basic' },
-        { key: 'business_type', label: 'Business Type', type: 'text', placeholder: 'e.g., Restaurant, Retail, Service', required: false, category: 'basic' },
+        { key: 'businessType', label: 'Business Type', type: 'text', placeholder: 'e.g., Restaurant, Retail, Service', required: false, category: 'basic' },
         { key: 'description', label: 'Description', type: 'textarea', placeholder: 'Describe your business', required: false, category: 'basic' },
 
         // Contact Information
         { key: 'address', label: 'Address', type: 'text', placeholder: 'Business address', required: false, category: 'contact' },
         { key: 'email', label: 'Business Email', type: 'email', placeholder: 'Business email address', required: false, category: 'contact' },
-        { key: 'contact_number', label: 'Primary Phone', type: 'tel', placeholder: 'Primary contact number', required: false, category: 'contact' },
-        { key: 'contact_number_2', label: 'Secondary Phone', type: 'tel', placeholder: 'Secondary contact number', required: false, category: 'contact' },
-        { key: 'gmap_link', label: 'Google Maps Link', type: 'url', placeholder: 'Google Maps URL for your business location', required: false, category: 'contact' },
+        { key: 'contactNumber', label: 'Primary Phone', type: 'tel', placeholder: 'Primary contact number', required: false, category: 'contact' },
+        { key: 'contactNumber2', label: 'Secondary Phone', type: 'tel', placeholder: 'Secondary contact number', required: false, category: 'contact' },
+        { key: 'gmapLink', label: 'Google Maps Link', type: 'url', placeholder: 'Google Maps URL for your business location', required: false, category: 'contact' },
         { key: 'region', label: 'Region', type: 'text', placeholder: 'Geographical region of your business', required: false, category: 'contact' },
 
         // Business Details
@@ -286,8 +286,8 @@ export default function BusinessProfilePage() {
         const currentValue = profile?.[field.key as keyof BusinessProfile];
         const isEditing = editing === field.key;
 
-        // Special handling for gmap_link to make it clickable
-        if (field.key === 'gmap_link' && currentValue && !isEditing) {
+        // Special handling for gmapLink to make it clickable
+        if (field.key === 'gmapLink' && currentValue && !isEditing) {
             return (
                 <div className="flex items-center justify-between group">
                     <div className="flex-1">

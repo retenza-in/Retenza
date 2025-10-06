@@ -9,13 +9,13 @@ export async function GET() {
             .select({
                 id: businesses.id,
                 name: businesses.name,
-                phone_number: businesses.phoneNumber,
-                business_type: businesses.businessType,
+                phoneNumber: businesses.phoneNumber,
+                businessType: businesses.businessType,
                 address: businesses.address,
                 description: businesses.description,
                 approved: businesses.approved,
-                created_at: businesses.createdAt,
-                is_setup_complete: businesses.isSetupComplete,
+                createdAt: businesses.createdAt,
+                isSetupComplete: businesses.isSetupComplete,
             })
             .from(businesses)
             .orderBy(businesses.createdAt);

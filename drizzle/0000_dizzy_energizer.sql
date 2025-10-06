@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS "reward_redemptions" (
 	"customer_id" integer NOT NULL,
 	"business_id" integer NOT NULL,
 	"reward_id" text NOT NULL,
-	"reward_type" varchar(50) NOT NULL,
+	"rewardType" varchar(50) NOT NULL,
 	"reward_value" numeric(10, 2) NOT NULL,
 	"transaction_id" integer NOT NULL,
 	"redeemed_at" timestamp DEFAULT now() NOT NULL

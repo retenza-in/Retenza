@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
                 // Find the customer's current tier
                 let currentTier = null;
                 for (let i = tiers.length - 1; i >= 0; i--) {
-                    if (loyaltyData.points >= tiers[i].points_to_unlock) {
+                    if (loyaltyData.points >= tiers[i].pointsToUnlock) {
                         currentTier = tiers[i];
                         break;
                     }
@@ -81,8 +81,8 @@ export async function POST(req: NextRequest) {
 
                 // Calculate cashback from current tier rewards
                 if (currentTier?.rewards) {
-                    currentTier.rewards.forEach((reward: { reward_type: string; percentage?: number }) => {
-                        if (reward.reward_type === 'cashback' && reward.percentage) {
+                    currentTier.rewards.forEach((reward: { rewardType: string; percentage?: number }) => {
+                        if (reward.rewardType === 'cashback' && reward.percentage) {
                             // Calculate cashback based on bill amount and percentage
                             const cashbackAmount = (billAmount * reward.percentage) / 100;
                             cashbackToAdd += cashbackAmount;
@@ -166,8 +166,8 @@ export async function POST(req: NextRequest) {
                 body: `You've earned ${pointsToAward} points on your purchase of ₹${Number(billAmount).toFixed(2)}. Total points: ${newPoints}`,
                 data: {
                     billAmount,
-                    points_awarded: pointsToAward,
-                    total_points: newPoints,
+                    pointsAwarded: pointsToAward,
+                    totalPoints: newPoints,
                     redeemedRewards
                 }
             });
@@ -187,11 +187,11 @@ export async function POST(req: NextRequest) {
                 let nextTier = null;
 
                 // Sort tiers by points threshold (ascending)
-                const sortedTiers = [...tiers].sort((a, b) => a.points_to_unlock - b.points_to_unlock);
+                const sortedTiers = [...tiers].sort((a, b) => a.pointsToUnlock - b.pointsToUnlock);
 
                 // Find the highest tier the customer qualifies for (reverse loop)
                 for (let i = sortedTiers.length - 1; i >= 0; i--) {
-                    if (newPoints >= sortedTiers[i].points_to_unlock) {
+                    if (newPoints >= sortedTiers[i].pointsToUnlock) {
                         currentTier = sortedTiers[i];
                         break;
                     }
@@ -199,7 +199,7 @@ export async function POST(req: NextRequest) {
 
                 // Find next tier
                 for (const tier of tiers) {
-                    if (newPoints < tier.points_to_unlock) {
+                    if (newPoints < tier.pointsToUnlock) {
                         nextTier = tier;
                         break;
                     }
@@ -222,17 +222,17 @@ export async function POST(req: NextRequest) {
                         title: 'Tier Upgraded! 🎉',
                         body: `Congratulations! You've been upgraded to ${currentTier.name} tier!`,
                         data: {
-                            new_tier: currentTier.name,
-                            points_required: currentTier.points_to_unlock,
-                            current_points: newPoints
+                            newTier: currentTier.name,
+                            pointsRequired: currentTier.pointsToUnlock,
+                            currentPoints: newPoints
                         }
                     });
                 }
 
                 // Send goal gradient nudge if close to next tier
                 if (nextTier) {
-                    const pointsToNextTier = nextTier.points_to_unlock - newPoints;
-                    const percentageToNext = Math.round(((newPoints - (currentTier?.points_to_unlock ?? 0)) / (nextTier.points_to_unlock - (currentTier?.points_to_unlock ?? 0))) * 100);
+                    const pointsToNextTier = nextTier.pointsToUnlock - newPoints;
+                    const percentageToNext = Math.round(((newPoints - (currentTier?.pointsToUnlock ?? 0)) / (nextTier.pointsToUnlock - (currentTier?.pointsToUnlock ?? 0))) * 100);
 
                     if (pointsToNextTier <= 50 && percentageToNext >= 80) {
                         await tx.insert(notifications).values({
@@ -242,10 +242,10 @@ export async function POST(req: NextRequest) {
                             title: 'Almost There! 🎯',
                             body: `You're just ${pointsToNextTier} points away from ${nextTier.name} tier!`,
                             data: {
-                                current_tier: currentTier?.name,
-                                next_tier: nextTier.name,
-                                points_needed: pointsToNextTier,
-                                percentage_complete: percentageToNext
+                                currentTier: currentTier?.name,
+                                nextTier: nextTier.name,
+                                pointsNeeded: pointsToNextTier,
+                                percentageComplete: percentageToNext
                             }
                         });
                     }
@@ -256,9 +256,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             success: true,
             message: "Transaction completed successfully",
-            points_awarded: pointsToAward,
-            total_discount: totalDiscount,
-            final_amount: finalAmount
+            pointsAwarded: pointsToAward,
+            totalDiscount: totalDiscount,
+            finalAmount: finalAmount
         });
     } catch (error) {
         console.error("Error processing transaction:", error);

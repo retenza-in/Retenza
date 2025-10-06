@@ -22,9 +22,9 @@ export async function GET(_req: NextRequest) {
         applicableTiers: missions.applicableTiers,
         expiresAt: missions.expiresAt,
         filters: missions.filters,
-        business_name: businesses.name,
-        business_address: businesses.address,
-        business_region: businesses.region,
+        businessName: businesses.name,
+        businessAddress: businesses.address,
+        businessRegion: businesses.region,
       })
       .from(missions)
       .innerJoin(businesses, eq(missions.businessId, businesses.id))
@@ -73,9 +73,9 @@ export async function GET(_req: NextRequest) {
     // Group missions by business
     const missionsByCompany = new Map<number, {
       businessId: number;
-      business_name: string;
-      business_address: string;
-      business_region: string;
+      businessName: string;
+      businessAddress: string;
+      businessRegion: string;
       missions: typeof eligibleMissions;
     }>();
 
@@ -84,9 +84,9 @@ export async function GET(_req: NextRequest) {
       if (!missionsByCompany.has(companyKey)) {
         missionsByCompany.set(companyKey, {
           businessId: mission.businessId,
-          business_name: mission.business_name,
-          business_address: mission.business_address ?? '',
-          business_region: mission.business_region ?? '',
+          businessName: mission.businessName,
+          businessAddress: mission.businessAddress ?? '',
+          businessRegion: mission.businessRegion ?? '',
           missions: []
         });
       }

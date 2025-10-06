@@ -5,7 +5,7 @@ This guide will help you update your production database to match the latest sch
 
 ## What's Changed
 1. **Removed `usage_limit` field** from reward schema
-2. **Added `usage_limit_per_month`** for monthly-based usage tracking
+2. **Added `usageLimitPerMonth`** for monthly-based usage tracking
 3. **Added `redeemable_points`** column for cashback accumulation
 4. **Added missing timestamp fields** to various tables
 5. **Updated reward structure** to be more flexible and user-friendly
@@ -16,7 +16,7 @@ This guide will help you update your production database to match the latest sch
 This script will:
 - Add missing columns safely (only if they don't exist)
 - Update existing reward data to remove old `usage_limit` field
-- Ensure all limited usage rewards have `usage_limit_per_month`
+- Ensure all limited usage rewards have `usageLimitPerMonth`
 - Add proper database comments
 
 ### 2. Verification Script: `drizzle/verify_migration.sql`
@@ -49,7 +49,7 @@ If you have automated database migrations, add this script to your pipeline.
 
 ### Phase 2: Update Reward Schema
 - Removes the old `usage_limit` field from all rewards
-- Ensures limited usage rewards have `usage_limit_per_month`
+- Ensures limited usage rewards have `usageLimitPerMonth`
 - Preserves all other reward data
 - Updates the JSONB structure in-place
 
@@ -67,7 +67,7 @@ psql -h your_host -U your_username -d your_database_name -f drizzle/verify_migra
 ### 2. Check for Success Indicators
 - ✅ All required columns should exist
 - ✅ No rewards should have the old `usage_limit` field
-- ✅ All limited usage rewards should have `usage_limit_per_month`
+- ✅ All limited usage rewards should have `usageLimitPerMonth`
 - ✅ `redeemable_points` should be present in `customer_loyalty`
 - ✅ All timestamp fields should be present
 
@@ -84,7 +84,7 @@ If something goes wrong, you can restore from your backup. The migration is desi
 ## Expected Results
 
 After successful migration:
-1. **Limited Usage Rewards**: Can be redeemed up to `usage_limit_per_month` times per month
+1. **Limited Usage Rewards**: Can be redeemed up to `usageLimitPerMonth` times per month
 2. **Cashback Rewards**: Accumulate points in `redeemable_points` for future redemption
 3. **Monthly Tracking**: System automatically tracks and enforces monthly usage limits
 4. **Flexible Rewards**: Rewards can be any type (free items, services, discounts)
@@ -103,19 +103,19 @@ If you encounter any issues during migration:
 {
   "id": 1,
   "name": "Silver Tier",
-  "points_to_unlock": 1000,
+  "pointsToUnlock": 1000,
   "rewards": [
     {
       "id": 101,
-      "reward_type": "cashback",
+      "rewardType": "cashback",
       "percentage": 5
     },
     {
       "id": 102,
-      "reward_type": "limited_usage",
-      "reward_text": "Free coffee",
-      "usage_limit_per_month": 2,
-      "one_time": false
+      "rewardType": "limited_usage",
+      "rewardText": "Free coffee",
+      "usageLimitPerMonth": 2,
+      "oneTime": false
     }
   ]
 }

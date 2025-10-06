@@ -7,19 +7,19 @@ import { cookies } from "next/headers";
 import { z } from 'zod';
 
 const cashbackRewardSchema = z.object({
-  reward_type: z.literal('cashback'),
+  rewardType: z.literal('cashback'),
   percentage: z.number().int().positive('Percentage must be a positive number.').max(100, 'Cashback cannot exceed 100%.'),
 });
 
 const limitedUsageRewardSchema = z.object({
-  reward_type: z.literal('limited_usage'),
+  rewardType: z.literal('limited_usage'),
   rewardText: z.string().min(1, 'Reward description is required.'),
   usageLimitPerMonth: z.number().positive('Usage limit per month must be a positive number.').max(12, 'Cannot exceed 12 times per month.'),
   oneTime: z.boolean(),
 });
 
 const customRewardSchema = z.object({
-  reward_type: z.literal('custom'),
+  rewardType: z.literal('custom'),
   name: z.string().min(1, 'Reward name is required.'),
   reward: z.string().min(1, 'Reward description is required.'),
 });
@@ -29,8 +29,8 @@ const loyaltyProgramSchema = z.object({
   description: z.string().min(10, 'A loyalty program description is required.'),
   tiers: z.array(z.object({
     name: z.string().min(1, 'Tier name is required.'),
-    points_to_unlock: z.number().int().positive('Points must be a positive integer.').min(1, 'Points must be at least 1.'),
-    rewards: z.array(z.discriminatedUnion('reward_type', [
+    pointsToUnlock: z.number().int().positive('Points must be a positive integer.').min(1, 'Points must be at least 1.'),
+    rewards: z.array(z.discriminatedUnion('rewardType', [
       cashbackRewardSchema,
       limitedUsageRewardSchema,
       customRewardSchema,
@@ -67,23 +67,23 @@ export async function POST(req: Request) {
         id: index + 1,
         rewards: tier.rewards.map((reward) => {
           // Preserve the original detailed structure, just add unique ID
-          if (reward.reward_type === 'cashback') {
+          if (reward.rewardType === 'cashback') {
             return {
               id: rewardIdCounter++, // Assign unique ID
               ...reward, // Keep all original fields
             };
-          } else if (reward.reward_type === 'limited_usage') {
+          } else if (reward.rewardType === 'limited_usage') {
             return {
               id: rewardIdCounter++, // Assign unique ID
               ...reward, // Keep all original fields
             };
-          } else if (reward.reward_type === 'custom') {
+          } else if (reward.rewardType === 'custom') {
             return {
               id: rewardIdCounter++, // Assign unique ID
               ...reward, // Keep all original fields
             };
           }
-          throw new Error(`Invalid reward type: ${(reward as any).reward_type}`);
+          throw new Error(`Invalid reward type: ${(reward as any).rewardType}`);
         }),
       }));
 

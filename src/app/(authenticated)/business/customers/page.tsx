@@ -41,14 +41,14 @@ type Customer = {
     pointsToUnlock: number;
     rewards: {
       id: string;
-      reward_type: "cashback" | "limited_usage" | "custom";
+      rewardType: "cashback" | "limited_usage" | "custom";
       percentage?: number;
-      reward_text?: string;
-      usage_limit_per_month?: number;
-      one_time?: boolean;
+      rewardText?: string;
+      usageLimitPerMonth?: number;
+      oneTime?: boolean;
       name?: string;
       reward?: string;
-      redeemed_count?: number;
+      redeemedCount?: number;
     }[];
   };
   monthlyRedemptions?: Record<string, number>; // Track monthly redemptions per reward ID
@@ -164,7 +164,7 @@ export default function BusinessCashierPage() {
     setLoadingMissions(true);
     try {
       const res = await fetch(
-        `/api/business/mission-registry?status=in_progress&customer_id=${customer.id}`,
+        `/api/business/mission-registry?status=in_progress&customerId=${customer.id}`,
       );
       console.log("Mission fetch response status:", res.status);
 
@@ -194,7 +194,7 @@ export default function BusinessCashierPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          registry_id: registryId,
+          registryId: registryId,
           status,
           notes: missionNotes || undefined,
         }),
@@ -242,7 +242,7 @@ export default function BusinessCashierPage() {
           // Auto-select cashback rewards (they only accumulate points, no immediate discount)
           const cashbackRewards = customerData.currentTier.rewards.filter(
             (reward) =>
-              reward.reward_type === "cashback" && canRedeemReward(reward),
+              reward.rewardType === "cashback" && canRedeemReward(reward),
           );
           setRedeemedRewards(cashbackRewards);
 
@@ -303,7 +303,7 @@ export default function BusinessCashierPage() {
       // Auto-select cashback rewards (they only accumulate points, no immediate discount)
       const cashbackRewards = customerData.currentTier.rewards.filter(
         (reward) =>
-          reward.reward_type === "cashback" && canRedeemReward(reward),
+          reward.rewardType === "cashback" && canRedeemReward(reward),
       );
       setRedeemedRewards(cashbackRewards);
 
@@ -320,21 +320,21 @@ export default function BusinessCashierPage() {
 
   const canRedeemReward = (reward: Customer['currentTier']['rewards'][number]): boolean => {
     // Check if one-time reward was already redeemed
-    if (reward.one_time && (reward.redeemed_count ?? 0) > 0) {
+    if (reward.oneTime && (reward.redeemedCount ?? 0) > 0) {
       return false;
     }
 
     // Check monthly usage limit for limited usage rewards
     if (
-      reward.reward_type === "limited_usage" &&
-      reward.usage_limit_per_month
+      reward.rewardType === "limited_usage" &&
+      reward.usageLimitPerMonth
     ) {
       // Count redemptions in the current month
       const monthlyRedemptions =
         customer?.monthlyRedemptions?.[reward.id] ?? 0;
 
       // Check if monthly limit is reached
-      if (monthlyRedemptions >= reward.usage_limit_per_month) {
+      if (monthlyRedemptions >= reward.usageLimitPerMonth) {
         return false;
       }
     }
@@ -344,13 +344,13 @@ export default function BusinessCashierPage() {
 
   const getRewardValue = (reward: Customer['currentTier']['rewards'][number], billAmount: number): number => {
     // Cashback rewards don't provide immediate discounts - they only accumulate points
-    if (reward.reward_type === "cashback") {
+    if (reward.rewardType === "cashback") {
       return 0;
     }
 
     // Limited usage rewards don't have automatic value calculation
     // The cashier will handle the reward manually (could be free item, service, etc.)
-    if (reward.reward_type === "limited_usage") {
+    if (reward.rewardType === "limited_usage") {
       return 0;
     }
 
@@ -383,7 +383,7 @@ export default function BusinessCashierPage() {
 
     // Add reward discounts (EXCLUDE cashback rewards - they only accumulate points)
     redeemedRewards.forEach((reward) => {
-      if (reward.reward_type !== "cashback") {
+      if (reward.rewardType !== "cashback") {
         totalDiscount += getRewardValue(reward, bill);
       }
     });
@@ -422,12 +422,12 @@ export default function BusinessCashierPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer_id: customer.id,
-          bill_amount: bill,
-          redeemablePoints_used: parseFloat(redeemablePointsToUse) || 0,
-          redeemed_rewards: redeemedRewards.map((reward) => ({
-            reward_id: reward.id,
-            reward_type: reward.reward_type,
+          customerId: customer.id,
+          billAmount: bill,
+          redeemablePointsUsed: parseFloat(redeemablePointsToUse) || 0,
+          redeemedRewards: redeemedRewards.map((reward) => ({
+            rewardId: reward.id,
+            rewardType: reward.rewardType,
             value: getRewardValue(reward, bill),
           })),
         }),
@@ -894,7 +894,7 @@ export default function BusinessCashierPage() {
 
                     {/* Cashback Rewards Info */}
                     {redeemedRewards.some(
-                      (r) => r.reward_type === "cashback",
+                      (r) => r.rewardType === "cashback",
                     ) && (
                         <div className="mt-3 border-t border-blue-200 pt-3">
                           <div className="mb-2 flex items-center gap-2">
@@ -1050,16 +1050,16 @@ export default function BusinessCashierPage() {
                               <div className="mb-2 flex items-center gap-2">
                                 <Badge
                                   className={
-                                    reward.reward_type === "cashback"
+                                    reward.rewardType === "cashback"
                                       ? "bg-green-100 text-green-800"
-                                      : reward.reward_type === "limited_usage"
+                                      : reward.rewardType === "limited_usage"
                                         ? "bg-blue-100 text-blue-800"
                                         : "bg-purple-100 text-purple-800"
                                   }
                                 >
-                                  {reward.reward_type.replace("_", " ")}
+                                  {reward.rewardType.replace("_", " ")}
                                 </Badge>
-                                {reward.one_time && (
+                                {reward.oneTime && (
                                   <Badge variant="outline" className="text-xs">
                                     One-time
                                   </Badge>
@@ -1067,15 +1067,15 @@ export default function BusinessCashierPage() {
                               </div>
 
                               <h4 className="font-medium text-gray-900">
-                                {reward.reward_type === "cashback" &&
+                                {reward.rewardType === "cashback" &&
                                   `${reward.percentage}% Cashback`}
-                                {reward.reward_type === "limited_usage" &&
-                                  reward.reward_text}
-                                {reward.reward_type === "custom" &&
+                                {reward.rewardType === "limited_usage" &&
+                                  reward.rewardText}
+                                {reward.rewardType === "custom" &&
                                   `${reward.name}: ${reward.reward}`}
                               </h4>
 
-                              {reward.reward_type === "cashback" &&
+                              {reward.rewardType === "cashback" &&
                                 billAmount && (
                                   <p className="mt-1 text-sm text-green-600">
                                     Will accumulate {reward.percentage}% as
@@ -1083,41 +1083,41 @@ export default function BusinessCashierPage() {
                                   </p>
                                 )}
 
-                              {reward.reward_type === "limited_usage" && (
+                              {reward.rewardType === "limited_usage" && (
                                 <p className="mt-1 text-sm text-blue-600">
                                   Manual reward - handle at checkout
                                 </p>
                               )}
 
-                              {reward.usage_limit_per_month && (
+                              {reward.usageLimitPerMonth && (
                                 <p className="mt-1 text-xs text-gray-500">
                                   Usage:{" "}
-                                  {reward.usage_limit_per_month === 1
+                                  {reward.usageLimitPerMonth === 1
                                     ? "Monthly"
-                                    : reward.usage_limit_per_month === 0.5
+                                    : reward.usageLimitPerMonth === 0.5
                                       ? "Bi-monthly"
-                                      : `${reward.usage_limit_per_month} times per month`}
+                                      : `${reward.usageLimitPerMonth} times per month`}
                                   {customer?.monthlyRedemptions?.[
                                     reward.id
                                   ] !== undefined && (
                                       <span className="ml-2 text-blue-600">
                                         (Used:{" "}
                                         {customer.monthlyRedemptions[reward.id]}/
-                                        {reward.usage_limit_per_month})
+                                        {reward.usageLimitPerMonth})
                                       </span>
                                     )}
                                 </p>
                               )}
 
-                              {reward.reward_type === "limited_usage" &&
-                                reward.usage_limit_per_month && (
+                              {reward.rewardType === "limited_usage" &&
+                                reward.usageLimitPerMonth && (
                                   <p className="mt-1 text-xs text-gray-500">
                                     Usage:{" "}
-                                    {reward.usage_limit_per_month === 1
+                                    {reward.usageLimitPerMonth === 1
                                       ? "Monthly"
-                                      : reward.usage_limit_per_month === 0.5
+                                      : reward.usageLimitPerMonth === 0.5
                                         ? "Bi-monthly"
-                                        : `${reward.usage_limit_per_month} times per month`}
+                                        : `${reward.usageLimitPerMonth} times per month`}
                                     {customer?.monthlyRedemptions?.[
                                       reward.id
                                     ] !== undefined && (
@@ -1128,7 +1128,7 @@ export default function BusinessCashierPage() {
                                             reward.id
                                             ]
                                           }
-                                          /{reward.usage_limit_per_month})
+                                          /{reward.usageLimitPerMonth})
                                         </span>
                                       )}
                                   </p>
@@ -1136,8 +1136,8 @@ export default function BusinessCashierPage() {
 
                               {!canRedeem && (
                                 <p className="mt-1 text-xs font-medium text-red-500">
-                                  {reward.one_time &&
-                                    (reward.redeemed_count ?? 0) > 0
+                                  {reward.oneTime &&
+                                    (reward.redeemedCount ?? 0) > 0
                                     ? "Already redeemed"
                                     : "Not available"}
                                 </p>

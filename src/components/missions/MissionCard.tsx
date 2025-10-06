@@ -17,9 +17,9 @@ interface Mission {
   expiresAt: string;
   filters: {
     gender?: ('Male' | 'Female' | 'Other')[];
-    age_range?: { min: number; max: number };
+    ageRange?: { min: number; max: number };
     location?: string[];
-    customer_type?: string[];
+    customerType?: string[];
   };
   businessName: string;
   businessAddress: string;
