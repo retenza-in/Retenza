@@ -23,27 +23,27 @@ export async function GET(
     }
 
     const [shopData] = await db
-      .select({
-        id: businesses.id,
-        name: businesses.name,
-        businessType: businesses.businessType,
-        address: businesses.address,
-        gmapLink: businesses.gmapLink,
-        logoUrl: businesses.logoUrl,
-        region: businesses.region,
-        loyaltyProgramId: loyaltyPrograms.id,
-        pointsRate: loyaltyPrograms.pointsRate,
-        description: loyaltyPrograms.description,
-        tiers: loyaltyPrograms.tiers,
-      })
-      .from(businesses)
-      .leftJoin(loyaltyPrograms, eq(loyaltyPrograms.businessId, businesses.id))
+    .select({
+      id: businesses.id,
+      name: businesses.name,
+      businessType: businesses.businessType,
+      address: businesses.address,
+      gmapLink: businesses.gmapLink,
+      logoUrl: businesses.logoUrl,
+      region: businesses.region,
+      loyaltyProgramId: loyaltyPrograms.id,
+      pointsRate: loyaltyPrograms.pointsRate,
+      description: loyaltyPrograms.description,
+      tiers: loyaltyPrograms.tiers,
+    })
+    .from(businesses)
+    .leftJoin(loyaltyPrograms, eq(loyaltyPrograms.businessId, businesses.id))
       .where(eq(businesses.id, shopId));
-
+      
     if (!shopData) {
       return NextResponse.json({ error: "Shop not found." }, { status: 404 });
     }
-
+    
     const [customerLoyaltyRecord] = await db
       .select()
       .from(customerLoyalty)

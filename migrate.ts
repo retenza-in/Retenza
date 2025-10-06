@@ -1,6 +1,7 @@
 import { db, loyaltyPrograms, missions } from "@/db";
+import { eq } from "drizzle-orm";
 
-throw new Error("done");
+// throw new Error("done");
 
 (async () => {
   const ms = await db.select().from(missions)
@@ -17,7 +18,7 @@ throw new Error("done");
 
         return newFilters
       })() : null
-    })
+    }).where(eq(missions.id, mission.id))
 
     console.log("Updated mission", mission.id)
   }
@@ -48,7 +49,7 @@ throw new Error("done");
 
         return newTier
       })
-    })
+    }).where(eq(loyaltyPrograms.id, program.id))
 
     console.log("Updated LP", program.id)
   }
