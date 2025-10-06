@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromSession } from '@/lib/session';
-import { db } from '@/server/db';
-import { businesses } from '@/server/db/schema';
+import { db } from '@/db';
+import { businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function GET() {
@@ -17,15 +17,15 @@ export async function GET() {
             .select({
                 id: businesses.id,
                 name: businesses.name,
-                business_type: businesses.business_type,
+                businessType: businesses.businessType,
                 description: businesses.description,
                 address: businesses.address,
-                contact_number: businesses.contact_number,
-                contact_number_2: businesses.contact_number_2,
+                contactNumber: businesses.contactNumber,
+                contactNumber2: businesses.contactNumber2,
                 email: businesses.email,
-                gmap_link: businesses.gmap_link,
-                logo_url: businesses.logo_url,
-                additional_info: businesses.additional_info,
+                gmapLink: businesses.gmapLink,
+                logoUrl: businesses.logoUrl,
+                additionalInfo: businesses.additionalInfo,
                 region: businesses.region,
             })
             .from(businesses)
@@ -59,15 +59,15 @@ export async function PATCH(request: NextRequest) {
         // Validate required fields
         const allowedFields = [
             'name',
-            'business_type',
+            'businessType',
             'description',
             'address',
-            'contact_number',
-            'contact_number_2',
+            'contactNumber',
+            'contactNumber2',
             'email',
-            'gmap_link',
-            'logo_url',
-            'additional_info',
+            'gmapLink',
+            'logoUrl',
+            'additionalInfo',
             'region'
         ];
 
@@ -91,21 +91,21 @@ export async function PATCH(request: NextRequest) {
             .update(businesses)
             .set({
                 ...updateData,
-                updated_at: new Date(),
+                updatedAt: new Date(),
             })
             .where(eq(businesses.id, business.id))
             .returning({
                 id: businesses.id,
                 name: businesses.name,
-                business_type: businesses.business_type,
+                businessType: businesses.businessType,
                 description: businesses.description,
                 address: businesses.address,
-                contact_number: businesses.contact_number,
-                contact_number_2: businesses.contact_number_2,
+                contactNumber: businesses.contactNumber,
+                contactNumber2: businesses.contactNumber2,
                 email: businesses.email,
-                gmap_link: businesses.gmap_link,
-                logo_url: businesses.logo_url,
-                additional_info: businesses.additional_info,
+                gmapLink: businesses.gmapLink,
+                logoUrl: businesses.logoUrl,
+                additionalInfo: businesses.additionalInfo,
                 region: businesses.region,
             });
 

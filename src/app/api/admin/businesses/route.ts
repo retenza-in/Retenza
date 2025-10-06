@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/server/db";
-import { businesses } from "@/server/db/schema";
+import { db } from "@/db";
+import { businesses } from "@/db/schema";
 
 export async function GET() {
     try {
@@ -9,16 +9,16 @@ export async function GET() {
             .select({
                 id: businesses.id,
                 name: businesses.name,
-                phone_number: businesses.phone_number,
-                business_type: businesses.business_type,
+                phoneNumber: businesses.phoneNumber,
+                businessType: businesses.businessType,
                 address: businesses.address,
                 description: businesses.description,
                 approved: businesses.approved,
-                created_at: businesses.created_at,
-                is_setup_complete: businesses.is_setup_complete,
+                createdAt: businesses.createdAt,
+                isSetupComplete: businesses.isSetupComplete,
             })
             .from(businesses)
-            .orderBy(businesses.created_at);
+            .orderBy(businesses.createdAt);
 
         return NextResponse.json({
             success: true,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/server/db';
-import { customers, businesses } from '@/server/db/schema';
+import { db } from '@/db';
+import { customers, businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
@@ -38,15 +38,15 @@ export async function POST(request: NextRequest) {
             // Update customer password
             updateResult = await db
                 .update(customers)
-                .set({ hashed_password: hashedPassword })
-                .where(eq(customers.phone_number, phone))
+                .set({ hashedPassword })
+                .where(eq(customers.phoneNumber, phone))
                 .returning({ id: customers.id });
         } else {
             // Update business password
             updateResult = await db
                 .update(businesses)
-                .set({ hashed_password: hashedPassword })
-                .where(eq(businesses.phone_number, phone))
+                .set({ hashedPassword })
+                .where(eq(businesses.phoneNumber, phone))
                 .returning({ id: businesses.id });
         }
 

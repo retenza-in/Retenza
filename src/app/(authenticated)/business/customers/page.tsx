@@ -28,59 +28,57 @@ import BusinessApprovalWrapper from "@/components/BusinessApprovalWrapper";
 
 type Customer = {
   id: number;
-  phone_number: string;
+  phoneNumber: string;
   name?: string | null;
-  current_tier_name?: string | null;
+  currentTierName?: string | null;
   points: number;
-  redeemable_points: string | number; // Can be string from DB or number
-  is_newly_enrolled?: boolean;
-  points_rate: number;
-  current_tier: {
+  redeemablePoints: string | number; // Can be string from DB or number
+  isNewlyEnrolled?: boolean;
+  pointsRate: number;
+  currentTier: {
     id: number;
     name: string;
-    points_to_unlock: number;
-    rewards: Reward[];
+    pointsToUnlock: number;
+    rewards: {
+      id: string;
+      rewardType: "cashback" | "limited_usage" | "custom";
+      percentage?: number;
+      rewardText?: string;
+      usageLimitPerMonth?: number;
+      oneTime?: boolean;
+      name?: string;
+      reward?: string;
+      redeemedCount?: number;
+    }[];
   };
-  monthly_redemptions?: Record<string, number>; // Track monthly redemptions per reward ID
-};
-
-type Reward = {
-  id: string;
-  reward_type: "cashback" | "limited_usage" | "custom";
-  percentage?: number;
-  reward_text?: string;
-  usage_limit_per_month?: number;
-  one_time?: boolean;
-  name?: string;
-  reward?: string;
-  redeemed_count?: number;
+  monthlyRedemptions?: Record<string, number>; // Track monthly redemptions per reward ID
 };
 
 type CustomerListItem = {
   id: number;
-  phone_number: string;
+  phoneNumber: string;
   name?: string | null;
   points: number;
-  current_tier_name?: string | null;
-  last_txn_at?: string | null;
-  created_at: string;
+  currentTierName?: string | null;
+  lastTxnAt?: string | null;
+  createdAt: string;
 };
 
 type MissionRegistry = {
   id: number;
-  customer_id: number;
-  mission_id: number;
+  customerId: number;
+  missionId: number;
   status: "in_progress" | "completed" | "failed";
-  started_at: string;
-  completed_at?: string;
-  discount_amount: string;
-  discount_percentage: string;
+  startedAt: string;
+  completedAt?: string;
+  discountAmount: string;
+  discountPercentage: string;
   notes?: string;
-  customer_name: string;
-  customer_phone: string;
-  mission_title: string;
-  mission_description: string;
-  mission_offer: string;
+  customerName: string;
+  customerPhone: string;
+  missionTitle: string;
+  missionDescription: string;
+  missionOffer: string;
 };
 
 export default function BusinessCashierPage() {
@@ -91,7 +89,7 @@ export default function BusinessCashierPage() {
   const [billAmount, setBillAmount] = useState("");
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loadingCustomer, setLoadingCustomer] = useState(false);
-  const [redeemedRewards, setRedeemedRewards] = useState<Reward[]>([]);
+  const [redeemedRewards, setRedeemedRewards] = useState<Customer['currentTier']['rewards']>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isNewCustomer, setIsNewCustomer] = useState(false);
 
@@ -166,7 +164,7 @@ export default function BusinessCashierPage() {
     setLoadingMissions(true);
     try {
       const res = await fetch(
-        `/api/business/mission-registry?status=in_progress&customer_id=${customer.id}`,
+        `/api/business/mission-registry?status=in_progress&customerId=${customer.id}`,
       );
       console.log("Mission fetch response status:", res.status);
 
@@ -196,7 +194,7 @@ export default function BusinessCashierPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          registry_id: registryId,
+          registryId: registryId,
           status,
           notes: missionNotes || undefined,
         }),
@@ -221,12 +219,12 @@ export default function BusinessCashierPage() {
   };
 
   const selectCustomerFromList = async (selectedCustomer: CustomerListItem) => {
-    setPhoneInput(selectedCustomer.phone_number);
+    setPhoneInput(selectedCustomer.phoneNumber);
     setShowCustomerList(false);
 
     // Auto-search for the selected customer
     const phoneNumber = parsePhoneNumberFromString(
-      selectedCustomer.phone_number,
+      selectedCustomer.phoneNumber,
       "IN",
     );
     if (phoneNumber?.isValid()) {
@@ -242,13 +240,13 @@ export default function BusinessCashierPage() {
           setCustomer(customerData);
 
           // Auto-select cashback rewards (they only accumulate points, no immediate discount)
-          const cashbackRewards = customerData.current_tier.rewards.filter(
+          const cashbackRewards = customerData.currentTier.rewards.filter(
             (reward) =>
-              reward.reward_type === "cashback" && canRedeemReward(reward),
+              reward.rewardType === "cashback" && canRedeemReward(reward),
           );
           setRedeemedRewards(cashbackRewards);
 
-          setIsNewCustomer(customerData.is_newly_enrolled ?? false);
+          setIsNewCustomer(customerData.isNewlyEnrolled ?? false);
           toast.success(`Customer selected: ${customerData.name ?? "Unnamed"}`);
           // fetchInProgressMissions will be called automatically by useEffect
         }
@@ -266,7 +264,7 @@ export default function BusinessCashierPage() {
         ?.toLowerCase()
         .includes(customerSearchTerm.toLowerCase()) ??
         false) ||
-      customer.phone_number.includes(customerSearchTerm),
+      customer.phoneNumber.includes(customerSearchTerm),
   );
 
   const enterCustomer = async () => {
@@ -303,13 +301,13 @@ export default function BusinessCashierPage() {
       setCustomer(customerData);
 
       // Auto-select cashback rewards (they only accumulate points, no immediate discount)
-      const cashbackRewards = customerData.current_tier.rewards.filter(
+      const cashbackRewards = customerData.currentTier.rewards.filter(
         (reward) =>
-          reward.reward_type === "cashback" && canRedeemReward(reward),
+          reward.rewardType === "cashback" && canRedeemReward(reward),
       );
       setRedeemedRewards(cashbackRewards);
 
-      setIsNewCustomer(customerData.is_newly_enrolled ?? false);
+      setIsNewCustomer(customerData.isNewlyEnrolled ?? false);
       toast.success(`Customer entered: ${customerData.name ?? "Unnamed"}`);
       // fetchInProgressMissions will be called automatically by useEffect
     } catch (error) {
@@ -320,23 +318,23 @@ export default function BusinessCashierPage() {
     }
   };
 
-  const canRedeemReward = (reward: Reward): boolean => {
+  const canRedeemReward = (reward: Customer['currentTier']['rewards'][number]): boolean => {
     // Check if one-time reward was already redeemed
-    if (reward.one_time && (reward.redeemed_count ?? 0) > 0) {
+    if (reward.oneTime && (reward.redeemedCount ?? 0) > 0) {
       return false;
     }
 
     // Check monthly usage limit for limited usage rewards
     if (
-      reward.reward_type === "limited_usage" &&
-      reward.usage_limit_per_month
+      reward.rewardType === "limited_usage" &&
+      reward.usageLimitPerMonth
     ) {
       // Count redemptions in the current month
       const monthlyRedemptions =
-        customer?.monthly_redemptions?.[reward.id] ?? 0;
+        customer?.monthlyRedemptions?.[reward.id] ?? 0;
 
       // Check if monthly limit is reached
-      if (monthlyRedemptions >= reward.usage_limit_per_month) {
+      if (monthlyRedemptions >= reward.usageLimitPerMonth) {
         return false;
       }
     }
@@ -344,22 +342,22 @@ export default function BusinessCashierPage() {
     return true;
   };
 
-  const getRewardValue = (reward: Reward, billAmount: number): number => {
+  const getRewardValue = (reward: Customer['currentTier']['rewards'][number], billAmount: number): number => {
     // Cashback rewards don't provide immediate discounts - they only accumulate points
-    if (reward.reward_type === "cashback") {
+    if (reward.rewardType === "cashback") {
       return 0;
     }
 
     // Limited usage rewards don't have automatic value calculation
     // The cashier will handle the reward manually (could be free item, service, etc.)
-    if (reward.reward_type === "limited_usage") {
+    if (reward.rewardType === "limited_usage") {
       return 0;
     }
 
     return 0;
   };
 
-  const toggleReward = (reward: Reward) => {
+  const toggleReward = (reward: Customer['currentTier']['rewards'][number]) => {
     if (!canRedeemReward(reward)) return;
 
     const isRedeemed = redeemedRewards.some((r) => r.id === reward.id);
@@ -385,7 +383,7 @@ export default function BusinessCashierPage() {
 
     // Add reward discounts (EXCLUDE cashback rewards - they only accumulate points)
     redeemedRewards.forEach((reward) => {
-      if (reward.reward_type !== "cashback") {
+      if (reward.rewardType !== "cashback") {
         totalDiscount += getRewardValue(reward, bill);
       }
     });
@@ -424,12 +422,12 @@ export default function BusinessCashierPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer_id: customer.id,
-          bill_amount: bill,
-          redeemable_points_used: parseFloat(redeemablePointsToUse) || 0,
-          redeemed_rewards: redeemedRewards.map((reward) => ({
-            reward_id: reward.id,
-            reward_type: reward.reward_type,
+          customerId: customer.id,
+          billAmount: bill,
+          redeemablePointsUsed: parseFloat(redeemablePointsToUse) || 0,
+          redeemedRewards: redeemedRewards.map((reward) => ({
+            rewardId: reward.id,
+            rewardType: reward.rewardType,
             value: getRewardValue(reward, bill),
           })),
         }),
@@ -440,8 +438,8 @@ export default function BusinessCashierPage() {
           const errorData = (await res.json()) as unknown;
           const errorMessage =
             typeof errorData === "object" &&
-            errorData !== null &&
-            "message" in errorData
+              errorData !== null &&
+              "message" in errorData
               ? String((errorData as { message: unknown }).message)
               : "Failed to process transaction";
           toast.error(errorMessage);
@@ -479,7 +477,7 @@ export default function BusinessCashierPage() {
   useEffect(() => {
     if (customer && billAmount) {
       const availablePoints = parseFloat(
-        customer.redeemable_points?.toString() || "0",
+        customer.redeemablePoints?.toString() || "0",
       );
       const bill = parseFloat(billAmount) || 0;
       if (bill > 0 && availablePoints > 0) {
@@ -603,7 +601,7 @@ export default function BusinessCashierPage() {
                         <span className="text-sm text-gray-700">
                           Tier:{" "}
                           <span className="font-medium">
-                            {customer.current_tier_name}
+                            {customer.currentTierName}
                           </span>
                         </span>
                       </div>
@@ -623,7 +621,7 @@ export default function BusinessCashierPage() {
                           <span className="font-medium">
                             ₹
                             {parseFloat(
-                              customer.redeemable_points?.toString() || "0",
+                              customer.redeemablePoints?.toString() || "0",
                             ).toFixed(2)}
                           </span>
                         </span>
@@ -634,8 +632,8 @@ export default function BusinessCashierPage() {
                         <span className="text-sm text-gray-700">
                           Points Rate:{" "}
                           <span className="font-medium">
-                            {customer.points_rate || 1} point
-                            {(customer.points_rate || 1) === 1 ? "" : "s"} per
+                            {customer.pointsRate || 1} point
+                            {(customer.pointsRate || 1) === 1 ? "" : "s"} per
                             ₹1
                           </span>
                         </span>
@@ -646,9 +644,9 @@ export default function BusinessCashierPage() {
                         <span className="text-sm text-gray-700">
                           Next Tier:{" "}
                           <span className="font-medium">
-                            {customer.current_tier.points_to_unlock >
-                            customer.points
-                              ? `${customer.current_tier.points_to_unlock - customer.points} points needed`
+                            {customer.currentTier.pointsToUnlock >
+                              customer.points
+                              ? `${customer.currentTier.pointsToUnlock - customer.points} points needed`
                               : "Maximum tier reached!"}
                           </span>
                         </span>
@@ -707,59 +705,59 @@ export default function BusinessCashierPage() {
                 {billAmount && customer && (
                   <div className="space-y-3">
                     {/* Redeemable Points Redemption */}
-                    {parseFloat(customer.redeemable_points?.toString() || "0") >
+                    {parseFloat(customer.redeemablePoints?.toString() || "0") >
                       0 && (
-                      <div className="rounded-lg border border-green-200 bg-green-50 p-3">
-                        <Label
-                          htmlFor="redeemablePoints"
-                          className="text-sm font-medium text-green-800"
-                        >
-                          Use Redeemable Cashback (Available: ₹
-                          {parseFloat(
-                            customer.redeemable_points?.toString() || "0",
-                          ).toFixed(2)}
-                          )
-                        </Label>
-                        <Input
-                          id="redeemablePoints"
-                          type="number"
-                          placeholder="0.00"
-                          value={redeemablePointsToUse}
-                          onChange={(e) => {
-                            setHasEditedRedeemable(true);
-                            const value = parseFloat(e.target.value) || 0;
-                            const availablePoints = parseFloat(
-                              customer.redeemable_points?.toString() || "0",
-                            );
-                            const bill = parseFloat(billAmount) || 0;
-                            const maxValue = Math.min(
-                              value,
-                              availablePoints,
-                              bill / 2,
-                            );
-                            setRedeemablePointsToUse(maxValue.toString());
-                          }}
-                          className="mt-1 border-green-300 text-sm focus:border-green-500"
-                          min="0"
-                          max={Math.min(
-                            parseFloat(
-                              customer.redeemable_points?.toString() || "0",
-                            ),
-                            parseFloat(billAmount) / 2 || 0,
-                          )}
-                          step="0.01"
-                        />
-                        <div className="mt-1 text-xs text-green-600">
-                          Max: ₹
-                          {Math.min(
-                            parseFloat(
-                              customer.redeemable_points?.toString() || "0",
-                            ),
-                            parseFloat(billAmount) || 0,
-                          ).toFixed(2)}
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-3">
+                          <Label
+                            htmlFor="redeemablePoints"
+                            className="text-sm font-medium text-green-800"
+                          >
+                            Use Redeemable Cashback (Available: ₹
+                            {parseFloat(
+                              customer.redeemablePoints?.toString() || "0",
+                            ).toFixed(2)}
+                            )
+                          </Label>
+                          <Input
+                            id="redeemablePoints"
+                            type="number"
+                            placeholder="0.00"
+                            value={redeemablePointsToUse}
+                            onChange={(e) => {
+                              setHasEditedRedeemable(true);
+                              const value = parseFloat(e.target.value) || 0;
+                              const availablePoints = parseFloat(
+                                customer.redeemablePoints?.toString() || "0",
+                              );
+                              const bill = parseFloat(billAmount) || 0;
+                              const maxValue = Math.min(
+                                value,
+                                availablePoints,
+                                bill / 2,
+                              );
+                              setRedeemablePointsToUse(maxValue.toString());
+                            }}
+                            className="mt-1 border-green-300 text-sm focus:border-green-500"
+                            min="0"
+                            max={Math.min(
+                              parseFloat(
+                                customer.redeemablePoints?.toString() || "0",
+                              ),
+                              parseFloat(billAmount) / 2 || 0,
+                            )}
+                            step="0.01"
+                          />
+                          <div className="mt-1 text-xs text-green-600">
+                            Max: ₹
+                            {Math.min(
+                              parseFloat(
+                                customer.redeemablePoints?.toString() || "0",
+                              ),
+                              parseFloat(billAmount) || 0,
+                            ).toFixed(2)}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
@@ -884,33 +882,33 @@ export default function BusinessCashierPage() {
                         <span className="font-bold text-blue-900">
                           {Math.floor(
                             parseFloat(billAmount) *
-                              (customer.points_rate || 1),
+                            (customer.pointsRate || 1),
                           )}
                         </span>
                       </div>
                       <div className="mt-1 text-xs text-blue-600">
-                        Rate: {customer.points_rate || 1} point
-                        {(customer.points_rate || 1) === 1 ? "" : "s"} per ₹1
+                        Rate: {customer.pointsRate || 1} point
+                        {(customer.pointsRate || 1) === 1 ? "" : "s"} per ₹1
                       </div>
                     </div>
 
                     {/* Cashback Rewards Info */}
                     {redeemedRewards.some(
-                      (r) => r.reward_type === "cashback",
+                      (r) => r.rewardType === "cashback",
                     ) && (
-                      <div className="mt-3 border-t border-blue-200 pt-3">
-                        <div className="mb-2 flex items-center gap-2">
-                          <Gift className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium text-green-800">
-                            Cashback Rewards Active
-                          </span>
+                        <div className="mt-3 border-t border-blue-200 pt-3">
+                          <div className="mb-2 flex items-center gap-2">
+                            <Gift className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-medium text-green-800">
+                              Cashback Rewards Active
+                            </span>
+                          </div>
+                          <div className="text-xs text-green-600">
+                            Cashback rewards will accumulate as redeemable points
+                            for future visits
+                          </div>
                         </div>
-                        <div className="text-xs text-green-600">
-                          Cashback rewards will accumulate as redeemable points
-                          for future visits
-                        </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 )}
 
@@ -966,24 +964,24 @@ export default function BusinessCashierPage() {
                             <div className="flex-1">
                               <div className="mb-2 flex items-center gap-2">
                                 <Badge className="bg-blue-100 text-blue-800">
-                                  {mission.mission_title}
+                                  {mission.missionTitle}
                                 </Badge>
                                 <Badge variant="outline" className="text-xs">
-                                  {mission.mission_offer}
+                                  {mission.missionOffer}
                                 </Badge>
                               </div>
                               <p className="mb-2 text-sm text-gray-700">
-                                {mission.mission_description}
+                                {mission.missionDescription}
                               </p>
                               <div className="space-y-1 text-xs text-gray-500">
                                 <p>
-                                  Customer: {mission.customer_name} (
-                                  {mission.customer_phone})
+                                  Customer: {mission.customerName} (
+                                  {mission.customerPhone})
                                 </p>
                                 <p>
                                   Started:{" "}
                                   {new Date(
-                                    mission.started_at,
+                                    mission.startedAt,
                                   ).toLocaleDateString()}
                                 </p>
                               </div>
@@ -1020,7 +1018,7 @@ export default function BusinessCashierPage() {
                     <User className="mx-auto mb-3 h-12 w-12 text-gray-300" />
                     <p>Enter a customer to see available rewards</p>
                   </div>
-                ) : customer.current_tier.rewards.length === 0 ? (
+                ) : customer.currentTier.rewards.length === 0 ? (
                   <div className="py-8 text-center text-gray-500">
                     <Gift className="mx-auto mb-3 h-12 w-12 text-gray-300" />
                     <p>No rewards available for this tier</p>
@@ -1030,7 +1028,7 @@ export default function BusinessCashierPage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {customer.current_tier.rewards.map((reward) => {
+                    {customer.currentTier.rewards.map((reward) => {
                       const canRedeem = canRedeemReward(reward);
                       const isRedeemed = redeemedRewards.some(
                         (r) => r.id === reward.id,
@@ -1039,13 +1037,12 @@ export default function BusinessCashierPage() {
                       return (
                         <div
                           key={reward.id}
-                          className={`rounded-lg border p-4 transition-all ${
-                            isRedeemed
-                              ? "border-green-500 bg-green-50"
-                              : canRedeem
-                                ? "cursor-pointer border-gray-200 hover:border-indigo-300"
-                                : "border-gray-200 bg-gray-50 opacity-60"
-                          }`}
+                          className={`rounded-lg border p-4 transition-all ${isRedeemed
+                            ? "border-green-500 bg-green-50"
+                            : canRedeem
+                              ? "cursor-pointer border-gray-200 hover:border-indigo-300"
+                              : "border-gray-200 bg-gray-50 opacity-60"
+                            }`}
                           onClick={() => canRedeem && toggleReward(reward)}
                         >
                           <div className="flex items-start justify-between">
@@ -1053,16 +1050,16 @@ export default function BusinessCashierPage() {
                               <div className="mb-2 flex items-center gap-2">
                                 <Badge
                                   className={
-                                    reward.reward_type === "cashback"
+                                    reward.rewardType === "cashback"
                                       ? "bg-green-100 text-green-800"
-                                      : reward.reward_type === "limited_usage"
+                                      : reward.rewardType === "limited_usage"
                                         ? "bg-blue-100 text-blue-800"
                                         : "bg-purple-100 text-purple-800"
                                   }
                                 >
-                                  {reward.reward_type.replace("_", " ")}
+                                  {reward.rewardType.replace("_", " ")}
                                 </Badge>
-                                {reward.one_time && (
+                                {reward.oneTime && (
                                   <Badge variant="outline" className="text-xs">
                                     One-time
                                   </Badge>
@@ -1070,15 +1067,15 @@ export default function BusinessCashierPage() {
                               </div>
 
                               <h4 className="font-medium text-gray-900">
-                                {reward.reward_type === "cashback" &&
+                                {reward.rewardType === "cashback" &&
                                   `${reward.percentage}% Cashback`}
-                                {reward.reward_type === "limited_usage" &&
-                                  reward.reward_text}
-                                {reward.reward_type === "custom" &&
+                                {reward.rewardType === "limited_usage" &&
+                                  reward.rewardText}
+                                {reward.rewardType === "custom" &&
                                   `${reward.name}: ${reward.reward}`}
                               </h4>
 
-                              {reward.reward_type === "cashback" &&
+                              {reward.rewardType === "cashback" &&
                                 billAmount && (
                                   <p className="mt-1 text-sm text-green-600">
                                     Will accumulate {reward.percentage}% as
@@ -1086,61 +1083,61 @@ export default function BusinessCashierPage() {
                                   </p>
                                 )}
 
-                              {reward.reward_type === "limited_usage" && (
+                              {reward.rewardType === "limited_usage" && (
                                 <p className="mt-1 text-sm text-blue-600">
                                   Manual reward - handle at checkout
                                 </p>
                               )}
 
-                              {reward.usage_limit_per_month && (
+                              {reward.usageLimitPerMonth && (
                                 <p className="mt-1 text-xs text-gray-500">
                                   Usage:{" "}
-                                  {reward.usage_limit_per_month === 1
+                                  {reward.usageLimitPerMonth === 1
                                     ? "Monthly"
-                                    : reward.usage_limit_per_month === 0.5
+                                    : reward.usageLimitPerMonth === 0.5
                                       ? "Bi-monthly"
-                                      : `${reward.usage_limit_per_month} times per month`}
-                                  {customer?.monthly_redemptions?.[
+                                      : `${reward.usageLimitPerMonth} times per month`}
+                                  {customer?.monthlyRedemptions?.[
                                     reward.id
                                   ] !== undefined && (
-                                    <span className="ml-2 text-blue-600">
-                                      (Used:{" "}
-                                      {customer.monthly_redemptions[reward.id]}/
-                                      {reward.usage_limit_per_month})
-                                    </span>
-                                  )}
+                                      <span className="ml-2 text-blue-600">
+                                        (Used:{" "}
+                                        {customer.monthlyRedemptions[reward.id]}/
+                                        {reward.usageLimitPerMonth})
+                                      </span>
+                                    )}
                                 </p>
                               )}
 
-                              {reward.reward_type === "limited_usage" &&
-                                reward.usage_limit_per_month && (
+                              {reward.rewardType === "limited_usage" &&
+                                reward.usageLimitPerMonth && (
                                   <p className="mt-1 text-xs text-gray-500">
                                     Usage:{" "}
-                                    {reward.usage_limit_per_month === 1
+                                    {reward.usageLimitPerMonth === 1
                                       ? "Monthly"
-                                      : reward.usage_limit_per_month === 0.5
+                                      : reward.usageLimitPerMonth === 0.5
                                         ? "Bi-monthly"
-                                        : `${reward.usage_limit_per_month} times per month`}
-                                    {customer?.monthly_redemptions?.[
+                                        : `${reward.usageLimitPerMonth} times per month`}
+                                    {customer?.monthlyRedemptions?.[
                                       reward.id
                                     ] !== undefined && (
-                                      <span className="ml-2 text-blue-600">
-                                        (Used:{" "}
-                                        {
-                                          customer.monthly_redemptions[
+                                        <span className="ml-2 text-blue-600">
+                                          (Used:{" "}
+                                          {
+                                            customer.monthlyRedemptions[
                                             reward.id
-                                          ]
-                                        }
-                                        /{reward.usage_limit_per_month})
-                                      </span>
-                                    )}
+                                            ]
+                                          }
+                                          /{reward.usageLimitPerMonth})
+                                        </span>
+                                      )}
                                   </p>
                                 )}
 
                               {!canRedeem && (
                                 <p className="mt-1 text-xs font-medium text-red-500">
-                                  {reward.one_time &&
-                                  (reward.redeemed_count ?? 0) > 0
+                                  {reward.oneTime &&
+                                    (reward.redeemedCount ?? 0) > 0
                                     ? "Already redeemed"
                                     : "Not available"}
                                 </p>
@@ -1238,7 +1235,7 @@ export default function BusinessCashierPage() {
                                   {customer.name ?? "Unnamed Customer"}
                                 </h3>
                                 <p className="text-sm text-gray-600">
-                                  {customer.phone_number}
+                                  {customer.phoneNumber}
                                 </p>
                               </div>
                             </div>
@@ -1247,7 +1244,7 @@ export default function BusinessCashierPage() {
                               <div className="flex items-center gap-1">
                                 <Crown className="h-3 w-3 text-yellow-500" />
                                 <span>
-                                  {customer.current_tier_name ?? "No Tier"}
+                                  {customer.currentTierName ?? "No Tier"}
                                 </span>
                               </div>
                               <div className="flex items-center gap-1">
@@ -1257,8 +1254,8 @@ export default function BusinessCashierPage() {
                               <div className="flex items-center gap-1">
                                 <History className="h-3 w-3 text-blue-500" />
                                 <span>
-                                  {customer.last_txn_at
-                                    ? `Last: ${new Date(customer.last_txn_at).toLocaleDateString()}`
+                                  {customer.lastTxnAt
+                                    ? `Last: ${new Date(customer.lastTxnAt).toLocaleDateString()}`
                                     : "No transactions"}
                                 </span>
                               </div>
@@ -1267,12 +1264,12 @@ export default function BusinessCashierPage() {
 
                           <div className="flex flex-col items-end">
                             <Badge variant="outline" className="mb-1">
-                              {customer.current_tier_name ?? "No Tier"}
+                              {customer.currentTierName ?? "No Tier"}
                             </Badge>
                             <span className="text-xs text-gray-400">
                               Joined:{" "}
                               {new Date(
-                                customer.created_at,
+                                customer.createdAt,
                               ).toLocaleDateString()}
                             </span>
                           </div>
@@ -1303,10 +1300,10 @@ export default function BusinessCashierPage() {
 
                 <div className="mb-4">
                   <p className="mb-2 text-sm text-gray-600">
-                    Mission: {selectedMission.mission_title}
+                    Mission: {selectedMission.missionTitle}
                   </p>
                   <p className="mb-2 text-sm text-gray-600">
-                    Customer: {selectedMission.customer_name}
+                    Customer: {selectedMission.customerName}
                   </p>
 
                   {/* Prominent Offer Display */}
@@ -1315,7 +1312,7 @@ export default function BusinessCashierPage() {
                       Mission Offer:
                     </p>
                     <p className="text-lg font-bold text-blue-900">
-                      {selectedMission.mission_offer}
+                      {selectedMission.missionOffer}
                     </p>
                   </div>
                 </div>

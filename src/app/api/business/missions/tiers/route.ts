@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/server/db";
-import { loyaltyPrograms } from "@/server/db/schema";
+import { db } from "@/db";
+import { loyaltyPrograms } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getUserFromSession as getBusinessFromSession } from "@/lib/session";
 
@@ -14,7 +14,7 @@ export async function GET() {
     const program = await db
       .select({ tiers: loyaltyPrograms.tiers })
       .from(loyaltyPrograms)
-      .where(eq(loyaltyPrograms.business_id, business.id))
+      .where(eq(loyaltyPrograms.businessId, business.id))
       .limit(1);
 
     if (!program.length) {

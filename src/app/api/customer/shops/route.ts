@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { db } from '@/server/db';
-import { businesses } from '@/server/db/schema';
+import { db } from '@/db';
+import { businesses } from '@/db/schema';
 import { getCustomerFromSession } from '@/lib/session';
 
 export async function GET(_req: NextRequest) {
@@ -12,10 +12,10 @@ export async function GET(_req: NextRequest) {
     const allBusinesses = await db.select({
       id: businesses.id,
       name: businesses.name,
-      business_type: businesses.business_type,
+      businessType: businesses.businessType,
       address: businesses.address,
-      gmap_link: businesses.gmap_link,
-      logo_url: businesses.logo_url,
+      gmapLink: businesses.gmapLink,
+      logoUrl: businesses.logoUrl,
       region: businesses.region,
     }).from(businesses);
 

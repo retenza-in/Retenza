@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { db } from '@/server/db';
-import { missions, sessions } from '@/server/db/schema';
+import { db } from '@/db';
+import { missions, sessions } from '@/db/schema';
 import { lt } from 'drizzle-orm';
 
 export async function GET(req: NextRequest) {
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     await db.transaction(async (tx) => {
       await tx.delete(sessions).where(lt(sessions.expiresAt, now));
-      await tx.delete(missions).where(lt(missions.expires_at, now));
+      await tx.delete(missions).where(lt(missions.expiresAt, now));
     });
 
     return NextResponse.json({

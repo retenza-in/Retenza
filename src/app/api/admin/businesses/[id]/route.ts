@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/server/db";
-import { businesses } from "@/server/db/schema";
+import { db } from "@/db";
+import { businesses } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function DELETE(
@@ -55,7 +55,7 @@ export async function PATCH(
             .update(businesses)
             .set({
                 approved: approved,
-                updated_at: new Date()
+                updatedAt: new Date()
             })
             .where(eq(businesses.id, parseInt(id)))
             .returning();

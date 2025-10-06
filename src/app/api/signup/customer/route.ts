@@ -1,5 +1,5 @@
-import { db } from "@/server/db";
-import { customers, sessions } from "@/server/db/schema";
+import { db } from "@/db";
+import { customers, sessions } from "@/db/schema";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
@@ -7,8 +7,6 @@ import { cookies } from "next/headers";
 import { z } from 'zod';
 import { adminAuth } from "@/lib/firebase/admin";
 import { createSession } from "@/lib/session";
-
-const SESSION_COOKIE_NAME = "session_id";
 
 const customerSignupSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters.'),
@@ -30,14 +28,14 @@ export async function POST(req: Request) {
     const { password, firebaseIdToken } = validatedData;
 
     const decodedToken = await adminAuth.verifyIdToken(firebaseIdToken);
-    const phoneNumber = decodedToken.phone_number; 
+    const phoneNumber = decodedToken.phoneNumber; 
 
     if (!phoneNumber) {
         return NextResponse.json({ error: "Phone number not found in token." }, { status: 400 });
     }
 
     const existing = await db.query.customers.findFirst({
-      where: (customers, { eq }) => eq(customers.phone_number, phoneNumber), 
+      where: (customers, { eq }) => eq(customers.phoneNumber, phoneNumber), 
     });
 
     if (existing) {
@@ -49,9 +47,9 @@ export async function POST(req: Request) {
     const [insertedCustomer] = await db
       .insert(customers)
       .values({
-        phone_number: phoneNumber,
-        hashed_password: hashedPassword,
-        is_setup_complete: false,
+        phoneNumber: phoneNumber,
+        hashedPassword: hashedPassword,
+        isSetupComplete: false,
       })
       .returning({ id: customers.id });
 

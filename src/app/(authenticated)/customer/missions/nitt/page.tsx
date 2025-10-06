@@ -23,42 +23,42 @@ import MissionCard from '@/components/missions/MissionCard';
 
 interface Mission {
   id: number;
-  business_id: number;
+  businessId: number;
   title: string;
   description: string;
   offer: string;
-  applicable_tiers: string[];
-  expires_at: string;
+  applicableTiers: string[];
+  expiresAt: string;
   filters: {
     gender?: ('Male' | 'Female' | 'Other')[];
-    age_range?: { min: number; max: number };
+    ageRange?: { min: number; max: number };
     location?: string[];
-    customer_type?: string[];
+    customerType?: string[];
   };
-  business_name: string;
-  business_address: string;
+  businessName: string;
+  businessAddress: string;
 }
 
 interface MissionRegistry {
   id: number;
-  mission_id: number;
+  missionId: number;
   status: 'in_progress' | 'completed' | 'failed';
-  started_at: string;
-  completed_at?: string;
-  discount_amount: string;
-  discount_percentage: string;
+  startedAt: string;
+  completedAt?: string;
+  discountAmount: string;
+  discountPercentage: string;
   notes?: string;
-  mission_title: string;
-  mission_description: string;
-  mission_offer: string;
-  business_name: string;
+  missionTitle: string;
+  missionDescription: string;
+  missionOffer: string;
+  businessName: string;
 }
 
 interface CompanyMissions {
-  business_id: number;
-  business_name: string;
-  business_address: string;
-  business_region: string;
+  businessId: number;
+  businessName: string;
+  businessAddress: string;
+  businessRegion: string;
   missions: Mission[];
 }
 
@@ -103,7 +103,7 @@ export default function CustomerMissionsPage() {
       const data = await response.json() as CompanyMissions[];
 
       setCompanyMissions(
-        data.filter(mission => mission.business_region.toLowerCase().includes("nit trichy"))
+        data.filter(mission => mission.businessRegion.toLowerCase().includes("nit trichy"))
       );
     } catch (error) {
       console.error('Error fetching missions:', error);
@@ -129,7 +129,7 @@ export default function CustomerMissionsPage() {
   // Flatten all missions into a single array with progress info
   const allMissions: MissionWithProgress[] = (companyMissions || []).flatMap(company =>
     (company.missions || []).map(mission => {
-      const progress = missionProgress.find(p => p.mission_id === mission.id);
+      const progress = missionProgress.find(p => p.missionId === mission.id);
       return {
         ...mission,
         progress,
@@ -144,8 +144,8 @@ export default function CustomerMissionsPage() {
   const filteredMissions = allMissions.filter(mission => {
     const matchesSearch = (mission.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (mission.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (mission.business_name || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCompany = selectedCompany === 'all' || mission.business_name === selectedCompany;
+      (mission.businessName || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCompany = selectedCompany === 'all' || mission.businessName === selectedCompany;
     return matchesSearch && matchesCompany;
   });
 
@@ -249,8 +249,8 @@ export default function CustomerMissionsPage() {
               >
                 <option value="all">All Companies</option>
                 {(companyMissions || []).map(company => (
-                  <option key={company.business_id} value={company.business_name}>
-                    {company.business_name}
+                  <option key={company.businessId} value={company.businessName}>
+                    {company.businessName}
                   </option>
                 ))}
               </select>

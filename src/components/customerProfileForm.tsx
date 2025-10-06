@@ -25,12 +25,12 @@ import {
 interface CustomerProfileFormProps {
   user: {
     id: number;
-    phone_number: string;
+    phoneNumber: string;
     name: string | null;
     gender: string | null;
     dob: Date | null;
     anniversary: Date | null;
-    is_setup_complete: boolean;
+    isSetupComplete: boolean;
   };
 }
 
@@ -177,7 +177,7 @@ export default function CustomerProfileForm({ user }: CustomerProfileFormProps) 
                           Phone Number
                         </div>
                         <div className="text-lg font-semibold text-slate-900">
-                          {user.phone_number}
+                          {user.phoneNumber}
                         </div>
                       </div>
                     </div>
@@ -346,11 +346,11 @@ export default function CustomerProfileForm({ user }: CustomerProfileFormProps) 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-600">Profile Complete</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.is_setup_complete
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.isSetupComplete
                       ? 'bg-green-100 text-green-800'
                       : 'bg-yellow-100 text-yellow-800'
                       }`}>
-                      {user.is_setup_complete ? 'Complete' : 'Incomplete'}
+                      {user.isSetupComplete ? 'Complete' : 'Incomplete'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">

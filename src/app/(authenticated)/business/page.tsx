@@ -20,9 +20,9 @@ import { useAuthSession } from '@/hooks/useAuthSession';
 import { toast } from 'react-toastify';
 
 type DashboardRow = {
-  c: { id: number; name: string | null; phone_number: string | null; created_at: string | null; updated_at: string | null; };
-  cl: { customer_id: number; business_id: number; points: number; current_tier_name: string | null; created_at: string | null; updated_at: string | null; } | null;
-  last_txn_at: string | null;
+  c: { id: number; name: string | null; phoneNumber: string | null; createdAt: string | null; updatedAt: string | null; };
+  cl: { customerId: number; businessId: number; points: number; currentTierName: string | null; createdAt: string | null; updatedAt: string | null; } | null;
+  lastTxnAt: string | null;
 };
 
 type DashboardPayload = {
@@ -39,22 +39,22 @@ type DashboardPayload = {
   newThisMonth: number;
   newThisQuarter: number;
   topCustomers: Array<{
-    customer_id: number;
+    customerId: number;
     points: number;
     tier: string | null;
   }>;
   recentTransactions: Array<{
     id: number;
-    customer_id: number;
-    bill_amount: string;
-    points_awarded: number;
-    created_at: string;
+    customerId: number;
+    billAmount: string;
+    pointsAwarded: number;
+    createdAt: string;
   }>;
   businessProfile: {
     name: string;
     description: string;
-    logo_url: string;
-    business_type: string;
+    logoUrl: string;
+    businessType: string;
   };
 };
 
@@ -110,8 +110,8 @@ export default function BusinessDashboardPage() {
     const leaderboard = rows.map(r => ({ id: r.c.id, name: r.c.name ?? `Customer #${r.c.id}`, points: r.cl?.points ?? 0 }))
       .sort((a, b) => b.points - a.points).slice(0, 5);
 
-    const recents = rows.map(r => ({ id: r.c.id, name: r.c.name ?? `Customer #${r.c.id}`, last_txn_at: r.last_txn_at }))
-      .sort((a, b) => (b.last_txn_at ? new Date(b.last_txn_at).getTime() : 0) - (a.last_txn_at ? new Date(a.last_txn_at).getTime() : 0))
+    const recents = rows.map(r => ({ id: r.c.id, name: r.c.name ?? `Customer #${r.c.id}`, lastTxnAt: r.lastTxnAt }))
+      .sort((a, b) => (b.lastTxnAt ? new Date(b.lastTxnAt).getTime() : 0) - (a.lastTxnAt ? new Date(a.lastTxnAt).getTime() : 0))
       .slice(0, 8);
 
     return { totalCustomers: total, avgPointsPerCustomer: avgPoints, topPoints: leaderboard, recentActivity: recents };
@@ -150,10 +150,10 @@ export default function BusinessDashboardPage() {
         <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              {payload?.businessProfile?.logo_url ? (
+              {payload?.businessProfile?.logoUrl ? (
                 <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 shadow-sm">
                   <img
-                    src={payload.businessProfile.logo_url}
+                    src={payload.businessProfile.logoUrl}
                     alt={`${payload.businessProfile.name} logo`}
                     className="w-full h-full object-cover"
                   />
@@ -312,11 +312,11 @@ export default function BusinessDashboardPage() {
               {payload?.topCustomers && payload.topCustomers.length > 0 ? (
                 <div className="space-y-3">
                   {payload.topCustomers.slice(0, 5).map((customer, index) => (
-                    <div key={customer.customer_id} className="flex items-center justify-between rounded-xl border p-3 hover:bg-blue-50 cursor-pointer" onClick={() => router.push(`/business/customers/${customer.customer_id}`)}>
+                    <div key={customer.customerId} className="flex items-center justify-between rounded-xl border p-3 hover:bg-blue-50 cursor-pointer" onClick={() => router.push(`/business/customers/${customer.customerId}`)}>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-semibold">#{index + 1}</div>
                         <div className="flex flex-col">
-                          <span className="font-medium">Customer #{customer.customer_id}</span>
+                          <span className="font-medium">Customer #{customer.customerId}</span>
                           <span className="text-xs text-muted-foreground">{customer.tier ?? 'No tier'}</span>
                         </div>
                       </div>
@@ -341,14 +341,14 @@ export default function BusinessDashboardPage() {
               {payload?.recentTransactions && payload.recentTransactions.length > 0 ? (
                 <div className="space-y-3">
                   {payload.recentTransactions.slice(0, 5).map((txn) => (
-                    <div key={txn.id} className="flex items-center justify-between rounded-xl border p-3 hover:bg-green-50 cursor-pointer" onClick={() => router.push(`/business/customers/${txn.customer_id}`)}>
+                    <div key={txn.id} className="flex items-center justify-between rounded-xl border p-3 hover:bg-green-50 cursor-pointer" onClick={() => router.push(`/business/customers/${txn.customerId}`)}>
                       <div className="flex flex-col">
-                        <span className="font-medium">Customer #{txn.customer_id}</span>
-                        <span className="text-xs text-muted-foreground">{formatDateTime(txn.created_at)}</span>
+                        <span className="font-medium">Customer #{txn.customerId}</span>
+                        <span className="text-xs text-muted-foreground">{formatDateTime(txn.createdAt)}</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold text-green-600">₹{Number(txn.bill_amount).toFixed(2)}</div>
-                        <div className="text-xs text-muted-foreground">+{txn.points_awarded} pts</div>
+                        <div className="font-semibold text-green-600">₹{Number(txn.billAmount).toFixed(2)}</div>
+                        <div className="text-xs text-muted-foreground">+{txn.pointsAwarded} pts</div>
                       </div>
                     </div>
                   ))}
@@ -447,7 +447,7 @@ export default function BusinessDashboardPage() {
                     <div key={r.id} className="flex items-center justify-between rounded-xl border p-3 hover:bg-amber-50 cursor-pointer" onClick={() => router.push(`/business/customers/${r.id}`)}>
                       <div className="flex flex-col">
                         <span className="font-medium">{r.name}</span>
-                        <span className="text-xs text-muted-foreground">{r.last_txn_at ? formatDateTime(r.last_txn_at) : 'No transactions yet'}</span>
+                        <span className="text-xs text-muted-foreground">{r.lastTxnAt ? formatDateTime(r.lastTxnAt) : 'No transactions yet'}</span>
                       </div>
                       <Button variant="outline" size="sm">View</Button>
                     </div>

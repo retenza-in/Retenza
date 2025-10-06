@@ -13,24 +13,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 
 const cashbackRewardSchema = z.object({
-  reward_type: z.literal('cashback'),
+  rewardType: z.literal('cashback'),
   percentage: z.number().int().positive('Percentage must be a positive number.').max(100, 'Cashback cannot exceed 100%.'),
 });
 
 const limitedUsageRewardSchema = z.object({
-  reward_type: z.literal('limited_usage'),
-  reward_text: z.string().min(1, 'Reward description is required.'),
-  usage_limit_per_month: z.number().positive('Usage limit per month must be a positive number.').max(12, 'Cannot exceed 12 times per month.'),
-  one_time: z.boolean(),
+  rewardType: z.literal('limited_usage'),
+  rewardText: z.string().min(1, 'Reward description is required.'),
+  usageLimitPerMonth: z.number().positive('Usage limit per month must be a positive number.').max(12, 'Cannot exceed 12 times per month.'),
+  oneTime: z.boolean(),
 });
 
 const customRewardSchema = z.object({
-  reward_type: z.literal('custom'),
+  rewardType: z.literal('custom'),
   name: z.string().min(1, 'Reward name is required.'),
   reward: z.string().min(1, 'Reward description is required.'),
 });
 
-const rewardSchema = z.discriminatedUnion('reward_type', [
+const rewardSchema = z.discriminatedUnion('rewardType', [
   cashbackRewardSchema,
   limitedUsageRewardSchema,
   customRewardSchema,
@@ -38,12 +38,12 @@ const rewardSchema = z.discriminatedUnion('reward_type', [
 
 const tierSchema = z.object({
   name: z.string().min(1, 'Tier name is required.'),
-  points_to_unlock: z.number().int().positive('Points must be a positive integer.').min(0, 'Points must be at least 0.'),
+  pointsToUnlock: z.number().int().positive('Points must be a positive integer.').min(0, 'Points must be at least 0.'),
   rewards: z.array(rewardSchema).min(1, 'At least one reward is required per tier.'),
 });
 
 const loyaltyProgramFormSchema = z.object({
-  points_rate: z.number().int().positive('Points rate must be a positive integer.').min(1, 'Points rate must be at least 1.'),
+  pointsRate: z.number().int().positive('Points rate must be a positive integer.').min(1, 'Points rate must be at least 1.'),
   description: z.string().min(10, 'A loyalty program description is required.'),
   tiers: z.array(tierSchema).min(1, 'At least one loyalty tier is required.'),
 });
@@ -70,13 +70,13 @@ export function LoyaltyProgramForm({
   } = useForm<LoyaltyProgramData>({
     resolver: zodResolver(loyaltyProgramFormSchema),
     defaultValues: {
-      points_rate: 1,
+      pointsRate: 1,
       description: '',
       tiers: [
         {
           name: 'Bronze',
-          points_to_unlock: 0,
-          rewards: [{ reward_type: 'cashback', percentage: 5 }],
+          pointsToUnlock: 0,
+          rewards: [{ rewardType: 'cashback', percentage: 5 }],
         },
       ],
     },
@@ -135,8 +135,8 @@ export function LoyaltyProgramForm({
                   type="button"
                   onClick={() => appendTier({
                     name: `Tier ${tierFields.length + 1}`,
-                    points_to_unlock: (tierFields.length + 1) * 100,
-                    rewards: [{ reward_type: 'cashback', percentage: 5 }],
+                    pointsToUnlock: (tierFields.length + 1) * 100,
+                    rewards: [{ rewardType: 'cashback', percentage: 5 }],
                   })}
                   className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
                 >
@@ -184,19 +184,19 @@ export function LoyaltyProgramForm({
 
                       {/* Points to Unlock */}
                       <div>
-                        <Label htmlFor={`tiers.${tierIndex}.points_to_unlock`} className="text-sm font-medium text-gray-700">
+                        <Label htmlFor={`tiers.${tierIndex}.pointsToUnlock`} className="text-sm font-medium text-gray-700">
                           Points to Unlock
                         </Label>
                         <Input
-                          id={`tiers.${tierIndex}.points_to_unlock`}
+                          id={`tiers.${tierIndex}.pointsToUnlock`}
                           type="number"
                           min="1"
                           placeholder="e.g., 100"
                           className="mt-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                          {...register(`tiers.${tierIndex}.points_to_unlock`, { valueAsNumber: true })}
+                          {...register(`tiers.${tierIndex}.pointsToUnlock`, { valueAsNumber: true })}
                         />
-                        {errors.tiers?.[tierIndex]?.points_to_unlock && (
-                          <p className="mt-1 text-sm text-red-600">{errors.tiers[tierIndex]?.points_to_unlock?.message}</p>
+                        {errors.tiers?.[tierIndex]?.pointsToUnlock && (
+                          <p className="mt-1 text-sm text-red-600">{errors.tiers[tierIndex]?.pointsToUnlock?.message}</p>
                         )}
                       </div>
 
@@ -270,7 +270,7 @@ const RewardFields = ({
 
   const handleAddReward = () => {
     appendReward({
-      reward_type: 'cashback',
+      rewardType: 'cashback',
       percentage: 5
     });
   };
@@ -283,7 +283,7 @@ const RewardFields = ({
       {rewardFields.map((reward, rewardIndex) => {
         const currentReward = watchedRewards?.[rewardIndex];
         // Ensure we have a proper reward object with default values
-        const rewardData = currentReward || { reward_type: 'cashback', percentage: 5 };
+        const rewardData = currentReward || { rewardType: 'cashback', percentage: 5 };
 
         return (
           <div key={reward.id} className="border-l-2 border-indigo-200 pl-3 py-3 space-y-3 rounded-sm bg-white">
@@ -304,7 +304,7 @@ const RewardFields = ({
               <div>
                 <Label>Reward Type</Label>
                 <Controller
-                  name={`tiers.${tierIndex}.rewards.${rewardIndex}.reward_type`}
+                  name={`tiers.${tierIndex}.rewards.${rewardIndex}.rewardType`}
                   control={control}
                   render={({ field }) => (
                     <Select
@@ -312,9 +312,9 @@ const RewardFields = ({
                         field.onChange(value);
                         // Set default values based on reward type
                         if (value === 'limited_usage') {
-                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.reward_text`, '');
-                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.usage_limit_per_month`, 1.0);
-                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.one_time`, false);
+                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.rewardText`, '');
+                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.usageLimitPerMonth`, 1.0);
+                          setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.oneTime`, false);
                         } else if (value === 'cashback') {
                           setValue(`tiers.${tierIndex}.rewards.${rewardIndex}.percentage`, 5);
                         } else if (value === 'custom') {
@@ -339,7 +339,7 @@ const RewardFields = ({
               </div>
 
               {/* Cashback Reward Fields */}
-              {rewardData.reward_type === 'cashback' && (
+              {rewardData.rewardType === 'cashback' && (
                 <div>
                   <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.percentage`}>Cashback Percentage</Label>
                   <Input
@@ -361,13 +361,13 @@ const RewardFields = ({
               )}
 
               {/* Limited Usage Reward Fields */}
-              {rewardData.reward_type === 'limited_usage' && (
+              {rewardData.rewardType === 'limited_usage' && (
                 <>
                   <div>
-                    <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.reward_text`}>Reward Text</Label>
+                    <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.rewardText`}>Reward Text</Label>
                     <Input
-                      id={`tiers.${tierIndex}.rewards.${rewardIndex}.reward_text`}
-                      {...register(`tiers.${tierIndex}.rewards.${rewardIndex}.reward_text`)}
+                      id={`tiers.${tierIndex}.rewards.${rewardIndex}.rewardText`}
+                      {...register(`tiers.${tierIndex}.rewards.${rewardIndex}.rewardText`)}
                       disabled={isLoading}
                       className="w-full min-w-0 focus:border-indigo-400 focus:ring-indigo-500"
                       placeholder="e.g., 20% off on next purchase"
@@ -384,20 +384,20 @@ const RewardFields = ({
 
 
                   <div>
-                    <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.usage_limit_per_month`}>Usage Limit Per Month</Label>
+                    <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.usageLimitPerMonth`}>Usage Limit Per Month</Label>
                     <Input
-                      id={`tiers.${tierIndex}.rewards.${rewardIndex}.usage_limit_per_month`}
+                      id={`tiers.${tierIndex}.rewards.${rewardIndex}.usageLimitPerMonth`}
                       type="number"
                       step="0.5"
-                      {...register(`tiers.${tierIndex}.rewards.${rewardIndex}.usage_limit_per_month`, { valueAsNumber: true })}
-                      disabled={isLoading || rewardData.one_time}
+                      {...register(`tiers.${tierIndex}.rewards.${rewardIndex}.usageLimitPerMonth`, { valueAsNumber: true })}
+                      disabled={isLoading || rewardData.oneTime}
                       className="w-full min-w-0 focus:border-indigo-400 focus:ring-indigo-500"
                       placeholder="e.g., 2 (twice per month), 0.5 (bi-monthly)"
                       min="0.5"
                       max="12"
                     />
                     <div className="text-xs text-gray-500 mt-1">
-                      {rewardData.one_time ? 'Disabled for one-time rewards' : '2 = twice per month, 0.5 = bi-monthly, 1 = monthly'}
+                      {rewardData.oneTime ? 'Disabled for one-time rewards' : '2 = twice per month, 0.5 = bi-monthly, 1 = monthly'}
                     </div>
                     {errors?.tiers?.[tierIndex]?.rewards?.[rewardIndex] && (
                       <p className="text-red-500 text-sm mt-1">
@@ -409,18 +409,18 @@ const RewardFields = ({
                   <div className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      id={`tiers.${tierIndex}.rewards.${rewardIndex}.one_time`}
-                      {...register(`tiers.${tierIndex}.rewards.${rewardIndex}.one_time`)}
+                      id={`tiers.${tierIndex}.rewards.${rewardIndex}.oneTime`}
+                      {...register(`tiers.${tierIndex}.rewards.${rewardIndex}.oneTime`)}
                       disabled={isLoading}
                       className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                     />
-                    <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.one_time`}>One-time reward only</Label>
+                    <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.oneTime`}>One-time reward only</Label>
                   </div>
                 </>
               )}
 
               {/* Custom Reward Fields */}
-              {rewardData.reward_type === 'custom' && (
+              {rewardData.rewardType === 'custom' && (
                 <>
                   <div>
                     <Label htmlFor={`tiers.${tierIndex}.rewards.${rewardIndex}.name`}>Reward Name</Label>

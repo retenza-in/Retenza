@@ -11,26 +11,26 @@ import BusinessApprovalWrapper from '@/components/BusinessApprovalWrapper';
 
 interface Transaction {
   id: number;
-  bill_amount: string;
-  points_awarded: number;
-  created_at: string;
+  billAmount: string;
+  pointsAwarded: number;
+  createdAt: string;
 }
 
 interface Loyalty {
   points: number;
-  current_tier_name: string;
+  currentTierName: string;
 }
 
 interface Customer {
   id: number;
   name: string | null;
-  phone_number: string;
+  phoneNumber: string;
   gender: string | null;
   dob: string | null;
   anniversary: string | null;
-  is_setup_complete: boolean;
-  created_at: string;
-  updated_at: string;
+  isSetupComplete: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function CustomerDetailPage() {
@@ -96,7 +96,7 @@ export default function CustomerDetailPage() {
       const res = await fetch(`/api/business/customers/${String(customerId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bill_amount: Number(billAmount) }),
+        body: JSON.stringify({ billAmount: Number(billAmount) }),
       });
       if (!res.ok) throw new Error('Failed to add transaction');
 
@@ -126,7 +126,7 @@ export default function CustomerDetailPage() {
             <CardTitle>{customer.name ?? 'Unnamed Customer'}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>Phone: {customer.phone_number}</p>
+            <p>Phone: {customer.phoneNumber}</p>
             <p>Gender: {customer.gender ?? 'N/A'}</p>
             <p>
               DOB: {customer.dob
@@ -147,7 +147,7 @@ export default function CustomerDetailPage() {
           </CardHeader>
           <CardContent>
             <p>Points: {loyalty?.points ?? 0}</p>
-            <p>Tier: {loyalty?.current_tier_name ?? 'N/A'}</p>
+            <p>Tier: {loyalty?.currentTierName ?? 'N/A'}</p>
           </CardContent>
         </Card>
 
@@ -182,9 +182,9 @@ export default function CustomerDetailPage() {
               <div className="grid gap-2">
                 {transactions.map((txn) => (
                   <Card key={txn.id} className="p-2">
-                    <p>Bill Amount: ₹{Number(txn.bill_amount).toFixed(2)}</p>
-                    <p>Points Awarded: {txn.points_awarded}</p>
-                    <p>Date: {new Date(txn.created_at).toLocaleString()}</p>
+                    <p>Bill Amount: ₹{Number(txn.billAmount).toFixed(2)}</p>
+                    <p>Points Awarded: {txn.pointsAwarded}</p>
+                    <p>Date: {new Date(txn.createdAt).toLocaleString()}</p>
                   </Card>
                 ))}
               </div>

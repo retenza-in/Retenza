@@ -1,8 +1,9 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { db, customers, customerLoyalty, transactions, loyaltyPrograms } from "@/server/db";
+import { db, customers, customerLoyalty, transactions, loyaltyPrograms } from "@/db";
 import { getUserFromSession } from "@/lib/session";
 import { eq, and, desc } from "drizzle-orm";
+import { Tier } from "@/db/schema";
 
 export async function GET(
   req: NextRequest,
@@ -21,14 +22,14 @@ export async function GET(
   const [cl] = await db
     .select()
     .from(customerLoyalty)
-    .where(and(eq(customerLoyalty.customer_id, customerId), eq(customerLoyalty.business_id, businessId)))
+    .where(and(eq(customerLoyalty.customerId, customerId), eq(customerLoyalty.businessId, businessId)))
     .limit(1);
 
   const txns = await db
     .select()
     .from(transactions)
-    .where(and(eq(transactions.customer_id, customerId), eq(transactions.business_id, businessId)))
-    .orderBy(desc(transactions.created_at))
+    .where(and(eq(transactions.customerId, customerId), eq(transactions.businessId, businessId)))
+    .orderBy(desc(transactions.createdAt))
     .limit(50);
 
   return NextResponse.json({ customer: cust, loyalty: cl ?? null, transactions: txns });
@@ -44,39 +45,39 @@ export async function POST(
 
   const businessId = session.id;
   const customerId = Number(id);
-  const body = await req.json() as { bill_amount?: number };
+  const body = await req.json() as { billAmount?: number };
 
-  if (!body.bill_amount) return NextResponse.json({ error: "bill_amount required" }, { status: 400 });
+  if (!body.billAmount) return NextResponse.json({ error: "billAmount required" }, { status: 400 });
 
-  const billAmountInt = Math.round(body.bill_amount);
+  const billAmountInt = Math.round(body.billAmount);
 
-  const [lp] = await db.select().from(loyaltyPrograms).where(eq(loyaltyPrograms.business_id, businessId)).limit(1);
-  const pointsRate = lp?.points_rate ?? 1;
+  const [lp] = await db.select().from(loyaltyPrograms).where(eq(loyaltyPrograms.businessId, businessId)).limit(1);
+  const pointsRate = lp?.pointsRate ?? 1;
   const pointsAwarded = Math.floor(billAmountInt * pointsRate);
 
   const insertedTxn = await db.insert(transactions).values({
-    customer_id: customerId,
-    business_id: businessId,
-    bill_amount: billAmountInt.toFixed(2),
-    points_awarded: pointsAwarded,
+    customerId: customerId,
+    businessId: businessId,
+    billAmount: billAmountInt.toFixed(2),
+    pointsAwarded: pointsAwarded,
   }).returning();
 
   const [cl] = await db
     .select()
     .from(customerLoyalty)
-    .where(and(eq(customerLoyalty.customer_id, customerId), eq(customerLoyalty.business_id, businessId)))
+    .where(and(eq(customerLoyalty.customerId, customerId), eq(customerLoyalty.businessId, businessId)))
     .limit(1);
 
   if (cl) {
     const newPoints = cl.points + pointsAwarded;
-    let newTier = cl.current_tier_name;
+    let newTier = cl.currentTierName;
 
     if (lp?.tiers?.length) {
-      const tiers = lp.tiers as Array<{ points_to_unlock: number; name: string }>;
-      tiers.sort((a, b) => a.points_to_unlock - b.points_to_unlock);
+      const tiers = lp.tiers as Tier[];
+      tiers.sort((a, b) => a.pointsToUnlock - b.pointsToUnlock);
       // Find the highest tier the customer qualifies for
       for (let i = tiers.length - 1; i >= 0; i--) {
-        if (newPoints >= tiers[i].points_to_unlock) {
+        if (newPoints >= tiers[i].pointsToUnlock) {
           newTier = tiers[i].name;
           break; // Found the highest qualifying tier
         }
@@ -87,27 +88,27 @@ export async function POST(
       .update(customerLoyalty)
       .set({
         ...(customerLoyalty.points && { [customerLoyalty.points.name]: newPoints }),
-        ...(customerLoyalty.current_tier_name && { [customerLoyalty.current_tier_name.name]: newTier })
+        ...(customerLoyalty.currentTierName && { [customerLoyalty.currentTierName.name]: newTier })
       })
-      .where(and(eq(customerLoyalty.customer_id, customerId), eq(customerLoyalty.business_id, businessId)));
+      .where(and(eq(customerLoyalty.customerId, customerId), eq(customerLoyalty.businessId, businessId)));
   } else {
     let initialTier = null;
     if (lp?.tiers?.length) {
-      const tiers = lp.tiers as Array<{ points_to_unlock: number; name: string }>;
-      tiers.sort((a, b) => a.points_to_unlock - b.points_to_unlock);
+      const tiers = lp.tiers as Array<{ pointsToUnlock: number; name: string }>;
+      tiers.sort((a, b) => a.pointsToUnlock - b.pointsToUnlock);
       // Find the highest tier the customer qualifies for
       for (let i = tiers.length - 1; i >= 0; i--) {
-        if (pointsAwarded >= tiers[i].points_to_unlock) {
+        if (pointsAwarded >= tiers[i].pointsToUnlock) {
           initialTier = tiers[i].name;
           break; // Found the highest qualifying tier
         }
       }
     }
     await db.insert(customerLoyalty).values({
-      customer_id: customerId,
-      business_id: businessId,
+      customerId: customerId,
+      businessId: businessId,
       ...(customerLoyalty.points && { points: pointsAwarded }),
-      ...(customerLoyalty.current_tier_name && { current_tier_name: initialTier }),
+      ...(customerLoyalty.currentTierName && { currentTierName: initialTier }),
     });
   }
 

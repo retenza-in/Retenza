@@ -11,11 +11,11 @@ import { Edit3, Trash2, Plus } from "lucide-react";
 
 export type Reward = {
   id?: number; // Changed from string to number for consistency with database
-  reward_type: "cashback" | "limited_usage" | "custom";
+  rewardType: "cashback" | "limited_usage" | "custom";
   percentage?: number;
-  reward_text?: string;
-  usage_limit_per_month?: number;
-  one_time?: boolean;
+  rewardText?: string;
+  usageLimitPerMonth?: number;
+  oneTime?: boolean;
   name?: string;
   reward?: string;
 };
@@ -33,11 +33,11 @@ export function RewardManager({
   disabled = false,
 }: RewardManagerProps) {
   const [rewardInput, setRewardInput] = useState<Reward>({
-    reward_type: "cashback",
+    rewardType: "cashback",
     percentage: 5,
-    reward_text: "",
-    usage_limit_per_month: 1.0,
-    one_time: false,
+    rewardText: "",
+    usageLimitPerMonth: 1.0,
+    oneTime: false,
     name: "",
     reward: "",
   });
@@ -47,30 +47,30 @@ export function RewardManager({
 
   const resetRewardInput = () => {
     setRewardInput({
-      reward_type: "cashback",
+      rewardType: "cashback",
       percentage: 5,
-      reward_text: "",
-      usage_limit_per_month: 1.0,
-      one_time: false,
+      rewardText: "",
+      usageLimitPerMonth: 1.0,
+      oneTime: false,
       name: "",
       reward: "",
     });
   };
 
   const validateReward = (reward: Reward): boolean => {
-    if (reward.reward_type === "cashback") {
+    if (reward.rewardType === "cashback") {
       return (
         reward.percentage !== undefined &&
         reward.percentage > 0 &&
         reward.percentage <= 100
       );
-    } else if (reward.reward_type === "limited_usage") {
+    } else if (reward.rewardType === "limited_usage") {
       return !!(
-        reward.reward_text &&
-        reward.usage_limit_per_month &&
-        reward.usage_limit_per_month > 0
+        reward.rewardText &&
+        reward.usageLimitPerMonth &&
+        reward.usageLimitPerMonth > 0
       );
-    } else if (reward.reward_type === "custom") {
+    } else if (reward.rewardType === "custom") {
       return !!(reward.name && reward.reward);
     }
     return false;
@@ -82,10 +82,10 @@ export function RewardManager({
     const newReward: Reward = {
       id: Date.now(),
       ...rewardInput,
-      reward_text:
-        rewardInput.reward_type === "custom"
+      rewardText:
+        rewardInput.rewardType === "custom"
           ? `${rewardInput.name}: ${rewardInput.reward}`
-          : rewardInput.reward_text,
+          : rewardInput.rewardText,
     };
 
     onRewardsChange([...rewards, newReward]);
@@ -100,10 +100,10 @@ export function RewardManager({
     updatedRewards[editingIndex] = {
       ...rewardInput,
       id: editingReward.id,
-      reward_text:
-        rewardInput.reward_type === "custom"
+      rewardText:
+        rewardInput.rewardType === "custom"
           ? `${rewardInput.name}: ${rewardInput.reward}`
-          : rewardInput.reward_text,
+          : rewardInput.rewardText,
     };
 
     onRewardsChange(updatedRewards);
@@ -130,17 +130,17 @@ export function RewardManager({
   };
 
   const getRewardDisplayText = (reward: Reward): string => {
-    if (reward.reward_type === "cashback") {
+    if (reward.rewardType === "cashback") {
       return `${reward.percentage}% cashback`;
-    } else if (reward.reward_type === "limited_usage") {
+    } else if (reward.rewardType === "limited_usage") {
       const monthlyText =
-        reward.usage_limit_per_month === 1
+        reward.usageLimitPerMonth === 1
           ? "Monthly"
-          : reward.usage_limit_per_month === 0.5
+          : reward.usageLimitPerMonth === 0.5
             ? "Bi-monthly"
-            : `${reward.usage_limit_per_month} times per month`;
-      return `${reward.reward_text} (${monthlyText})`;
-    } else if (reward.reward_type === "custom") {
+            : `${reward.usageLimitPerMonth} times per month`;
+      return `${reward.rewardText} (${monthlyText})`;
+    } else if (reward.rewardType === "custom") {
       return `${reward.name}: ${reward.reward}`;
     }
     return "Unknown reward type";
@@ -178,25 +178,25 @@ export function RewardManager({
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-2">
                         <Badge
-                          className={getRewardTypeColor(reward.reward_type)}
+                          className={getRewardTypeColor(reward.rewardType)}
                         >
-                          {reward.reward_type.replace("_", " ")}
+                          {reward.rewardType.replace("_", " ")}
                         </Badge>
                         <span className="font-medium text-gray-900">
                           {getRewardDisplayText(reward)}
                         </span>
                       </div>
 
-                      {reward.reward_type === "limited_usage" &&
-                        reward.usage_limit_per_month && (
+                      {reward.rewardType === "limited_usage" &&
+                        reward.usageLimitPerMonth && (
                           <div className="text-sm text-gray-600">
                             <span>
                               Usage:{" "}
-                              {reward.usage_limit_per_month === 1
+                              {reward.usageLimitPerMonth === 1
                                 ? "Monthly"
-                                : reward.usage_limit_per_month === 0.5
+                                : reward.usageLimitPerMonth === 0.5
                                   ? "Bi-monthly"
-                                  : `${reward.usage_limit_per_month} times per month`}
+                                  : `${reward.usageLimitPerMonth} times per month`}
                             </span>
                           </div>
                         )}
@@ -244,11 +244,11 @@ export function RewardManager({
               Reward Type
             </Label>
             <select
-              value={rewardInput.reward_type}
+              value={rewardInput.rewardType}
               onChange={(e) =>
                 setRewardInput({
                   ...rewardInput,
-                  reward_type: e.target.value as Reward["reward_type"],
+                  rewardType: e.target.value as Reward["rewardType"],
                 })
               }
               disabled={disabled}
@@ -261,7 +261,7 @@ export function RewardManager({
           </div>
 
           {/* Cashback Reward Fields */}
-          {rewardInput.reward_type === "cashback" && (
+          {rewardInput.rewardType === "cashback" && (
             <div>
               <Label className="text-sm font-medium text-gray-700">
                 Cashback Percentage
@@ -288,18 +288,18 @@ export function RewardManager({
           )}
 
           {/* Limited Usage Reward Fields */}
-          {rewardInput.reward_type === "limited_usage" && (
+          {rewardInput.rewardType === "limited_usage" && (
             <div className="space-y-4">
               <div>
                 <Label className="text-sm font-medium text-gray-700">
                   Reward Text
                 </Label>
                 <Input
-                  value={rewardInput.reward_text ?? ""}
+                  value={rewardInput.rewardText ?? ""}
                   onChange={(e) =>
                     setRewardInput({
                       ...rewardInput,
-                      reward_text: e.target.value,
+                      rewardText: e.target.value,
                     })
                   }
                   disabled={disabled}
@@ -317,19 +317,19 @@ export function RewardManager({
                   step="0.5"
                   min="0.5"
                   max="12"
-                  value={rewardInput.usage_limit_per_month ?? ""}
+                  value={rewardInput.usageLimitPerMonth ?? ""}
                   onChange={(e) =>
                     setRewardInput({
                       ...rewardInput,
-                      usage_limit_per_month: Number(e.target.value),
+                      usageLimitPerMonth: Number(e.target.value),
                     })
                   }
-                  disabled={disabled || rewardInput.one_time}
+                  disabled={disabled || rewardInput.oneTime}
                   placeholder="e.g., 2 (twice per month), 0.5 (bi-monthly)"
                   className="mt-1 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                  {rewardInput.one_time
+                  {rewardInput.oneTime
                     ? "Disabled for one-time rewards"
                     : "2 = twice per month, 0.5 = bi-monthly, 1 = monthly"}
                 </p>
@@ -339,11 +339,11 @@ export function RewardManager({
                 <input
                   type="checkbox"
                   id="one-time"
-                  checked={rewardInput.one_time ?? false}
+                  checked={rewardInput.oneTime ?? false}
                   onChange={(e) =>
                     setRewardInput({
                       ...rewardInput,
-                      one_time: e.target.checked,
+                      oneTime: e.target.checked,
                     })
                   }
                   disabled={disabled}
@@ -360,7 +360,7 @@ export function RewardManager({
           )}
 
           {/* Custom Reward Fields */}
-          {rewardInput.reward_type === "custom" && (
+          {rewardInput.rewardType === "custom" && (
             <div className="space-y-4">
               <div>
                 <Label className="text-sm font-medium text-gray-700">

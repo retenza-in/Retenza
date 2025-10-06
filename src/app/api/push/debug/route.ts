@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/server/db';
-import { pushSubscriptions, customers, businesses } from '@/server/db/schema';
+import { db } from '@/db';
+import { pushSubscriptions, customers, businesses } from '@/db/schema';
 
 export async function GET() {
     try {
@@ -41,14 +41,14 @@ export async function GET() {
                 },
                 sampleSubscriptions: sampleSubscriptions.map(sub => ({
                     id: sub.id,
-                    customer_id: sub.customer_id,
-                    business_id: sub.business_id,
+                    customerId: sub.customerId,
+                    businessId: sub.businessId,
                     endpoint: sub.endpoint.substring(0, 50) + '...',
                 })),
                 sampleCustomers: sampleCustomers.map(cust => ({
                     id: cust.id,
                     name: cust.name,
-                    phone_number: cust.phone_number,
+                    phoneNumber: cust.phoneNumber,
                 })),
             }
         });

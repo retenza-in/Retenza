@@ -43,9 +43,9 @@ interface Mission {
   title: string;
   description: string;
   offer: string;
-  business_name: string;
-  business_id: number;
-  business_region: string | null;
+  businessName: string;
+  businessId: number;
+  businessRegion: string | null;
 }
 
 interface QuickStats {
@@ -57,10 +57,10 @@ interface QuickStats {
 function pickTopMissions(allMissions: Mission[], count = 3): Mission[] {
   const missionsByShop = new Map<number, Mission[]>();
   allMissions.forEach((mission) => {
-    if (!missionsByShop.has(mission.business_id)) {
-      missionsByShop.set(mission.business_id, []);
+    if (!missionsByShop.has(mission.businessId)) {
+      missionsByShop.set(mission.businessId, []);
     }
-    missionsByShop.get(mission.business_id)!.push(mission);
+    missionsByShop.get(mission.businessId)!.push(mission);
   });
 
   const uniqueMissions: Mission[] = [];
@@ -81,7 +81,7 @@ export default function CustomerDashboard() {
   const [topMissions, nittMissions] = useMemo(() => {
     const topMissions: Mission[] = [], nittMissions: Mission[] = []
     allMissions.forEach(mission => {
-      if (mission.business_region?.toLowerCase().includes("nit trichy")) nittMissions.push(mission)
+      if (mission.businessRegion?.toLowerCase().includes("nit trichy")) nittMissions.push(mission)
       else topMissions.push(mission)
     })
     return [pickTopMissions(topMissions), nittMissions]
@@ -115,8 +115,8 @@ export default function CustomerDashboard() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          business_id: mission.business_id,
-          mission_id: mission.id,
+          businessId: mission.businessId,
+          missionId: mission.id,
         }),
       });
 
@@ -153,8 +153,8 @@ export default function CustomerDashboard() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          mission_id: missionId,
-          business_id: businessId,
+          missionId: missionId,
+          businessId: businessId,
           status: "in_progress",
         }),
       });
@@ -173,9 +173,9 @@ export default function CustomerDashboard() {
       const missionsResponse = await fetch("/api/customer/missions");
       if (missionsResponse.ok) {
         const missionsData = (await missionsResponse.json()) as {
-          business_id: number;
-          business_name: string;
-          business_address: string;
+          businessId: number;
+          businessName: string;
+          businessAddress: string;
           missions: Mission[];
         }[];
         console.log("Refreshed missions data:", missionsData);
@@ -183,7 +183,7 @@ export default function CustomerDashboard() {
         const allMissions = missionsData.flatMap((company) =>
           company.missions.map((mission) => ({
             ...mission,
-            business_name: company.business_name,
+            businessName: company.businessName,
           })),
         );
         console.log('Refreshed flattened missions:', allMissions);
@@ -234,10 +234,10 @@ export default function CustomerDashboard() {
           const missionsResponse = await fetch("/api/customer/missions");
           if (missionsResponse.ok) {
             const missionsData = await missionsResponse.json() as {
-              business_id: number;
-              business_name: string;
-              business_address: string;
-              business_region: string | null,
+              businessId: number;
+              businessName: string;
+              businessAddress: string;
+              businessRegion: string | null,
               missions: Mission[]
             }[];
             console.log('Raw missions data:', missionsData);
@@ -245,8 +245,8 @@ export default function CustomerDashboard() {
             const allMissions = missionsData.flatMap((company) =>
               company.missions.map((mission) => ({
                 ...mission,
-                business_name: company.business_name,
-                business_region: company.business_region ?? ""
+                businessName: company.businessName,
+                businessRegion: company.businessRegion ?? ""
               }))
             );
             console.log('Flattened missions:', allMissions);
@@ -264,7 +264,7 @@ export default function CustomerDashboard() {
               const missionRegistryData =
                 (await missionRegistryResponse.json()) as {
                   success: boolean;
-                  registries: Array<{ mission_id: string; status: string }>;
+                  registries: Array<{ missionId: string; status: string }>;
                 };
               completedMissionsCount = missionRegistryData.registries.filter(
                 (mission) => mission.status === "completed",
@@ -272,7 +272,7 @@ export default function CustomerDashboard() {
               missionRegistryData.registries
                 .filter((mission) => mission.status === "in_progress")
                 .forEach((mission) =>
-                  ongoingMissionIds.add(mission.mission_id),
+                  ongoingMissionIds.add(mission.missionId),
                 );
             }
           } catch {
@@ -518,7 +518,7 @@ export default function CustomerDashboard() {
                     <p className="text-xs text-gray-600 line-clamp-2">{mission.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-green-600">{mission.offer}</span>
-                      <span className="text-xs text-gray-500">{mission.business_name}</span>
+                      <span className="text-xs text-gray-500">{mission.businessName}</span>
                     </div>
 
                     {ongoingMissions.has(mission.id) ? (
@@ -543,7 +543,7 @@ export default function CustomerDashboard() {
                       </Button>
                     ) : (
                       <Button
-                        onClick={() => startMission(mission.id, mission.business_id)}
+                        onClick={() => startMission(mission.id, mission.businessId)}
                         disabled={startingMission === mission.id}
                         size="sm"
                         className="w-full bg-purple-500 hover:bg-purple-600 text-white text-xs"
@@ -670,7 +670,7 @@ export default function CustomerDashboard() {
                           {mission.offer}
                         </span>
                         <span className="text-xs text-gray-500">
-                          {mission.business_name}
+                          {mission.businessName}
                         </span>
                       </div>
                     </div>
@@ -704,7 +704,7 @@ export default function CustomerDashboard() {
                       ) : (
                         <Button
                           onClick={() =>
-                            startMission(mission.id, mission.business_id)
+                            startMission(mission.id, mission.businessId)
                           }
                           disabled={startingMission === mission.id}
                           size="sm"

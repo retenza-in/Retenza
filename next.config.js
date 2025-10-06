@@ -1,4 +1,3 @@
-import "./src/env.js";
 import withPWA from 'next-pwa';
 
 const pwaConfig = withPWA({

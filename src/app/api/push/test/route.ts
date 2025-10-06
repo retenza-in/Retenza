@@ -1,9 +1,8 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { db } from '@/server/db';
-import { pushSubscriptions } from '@/server/db/schema';
+import { db } from '@/db';
+import { pushSubscriptions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { env } from '@/env';
 
 export async function POST(request: NextRequest) {
     try {
@@ -21,7 +20,7 @@ export async function POST(request: NextRequest) {
         const subscriptions = await db
             .select()
             .from(pushSubscriptions)
-            .where(eq(pushSubscriptions.business_id, businessId));
+            .where(eq(pushSubscriptions.businessId, businessId));
 
         if (subscriptions.length === 0) {
             return NextResponse.json(
@@ -37,7 +36,7 @@ export async function POST(request: NextRequest) {
             subscriptions.map(async (subscription) => {
                 try {
                     // Use request origin or configurable base URL
-                    const baseUrl = request.headers.get('origin') ?? env.BASE_URL ?? process.env.VERCEL_URL ?? 'http://localhost:3000';
+                    const baseUrl = request.headers.get('origin') ?? process.env.BASE_URL ?? process.env.VERCEL_URL ?? 'http://localhost:3000';
                     const response = await fetch(`${baseUrl}/api/push/send`, {
                         method: 'POST',
                         headers: {
@@ -67,12 +66,12 @@ export async function POST(request: NextRequest) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
 
-                    return { success: true, customerId: subscription.customer_id };
+                    return { success: true, customerId: subscription.customerId };
                 } catch (error) {
-                    console.error(`Failed to send to customer ${subscription.customer_id}:`, error);
+                    console.error(`Failed to send to customer ${subscription.customerId}:`, error);
                     return {
                         success: false,
-                        customerId: subscription.customer_id,
+                        customerId: subscription.customerId,
                         error: error instanceof Error ? error.message : 'Unknown error'
                     };
                 }
